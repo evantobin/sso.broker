@@ -188,7 +188,12 @@ sso.broker/
 │   │       └── AuthenticationStep.tsx # Authentication flow component
 │   ├── package.json       # Frontend dependencies (includes react-router-dom)
 │   └── vite.config.ts     # Vite configuration
-├── deploy.sh              # Deployment script
+├── scripts/               # Deployment and utility scripts
+│   ├── deploy.sh          # Deployment script
+│   └── updatecerts.sh     # Certificate generation script
+├── docs/                  # Documentation
+│   ├── CERTIFICATE_MANAGEMENT.md  # Certificate management guide
+│   └── SAML_TESTING.md    # SAML testing examples
 └── README.md              # This file
 ```
 
@@ -239,6 +244,7 @@ wrangler secret put GITHUB_CLIENT_SECRET
 
 3. **Generate and Upload Certificates** (automated):
 ```bash
+cd scripts
 ./updatecerts.sh
 ```
 
@@ -249,10 +255,13 @@ This script automatically generates:
 
 All secrets are automatically uploaded to Cloudflare Workers with proper formatting for SAML metadata.
 
+📚 **Documentation**: See `docs/CERTIFICATE_MANAGEMENT.md` for detailed certificate management information.
+
 ## Deployment
 
 ### Automated Deployment
 ```bash
+cd scripts
 ./deploy.sh
 ```
 
@@ -264,6 +273,7 @@ This script:
 
 **After deployment, run:**
 ```bash
+cd scripts
 ./updatecerts.sh
 ```
 
@@ -271,7 +281,7 @@ This generates and uploads all required certificates and secrets to Cloudflare W
 
 ### Certificate Management
 
-The `updatecerts.sh` script handles all certificate and secret generation:
+The `scripts/updatecerts.sh` script handles all certificate and secret generation:
 
 **Features:**
 - **Automated Generation**: Creates fresh certificates and secrets with one command
@@ -318,6 +328,8 @@ npm run build
 - `GET /saml/sso` - SAML Single Sign-On endpoint
 - `POST /saml/consent` - SAML consent handling
 - `GET /saml/slo` - SAML Single Logout endpoint (not yet implemented)
+
+📚 **Testing Guide**: See `docs/SAML_TESTING.md` for comprehensive SAML testing examples and integration guides.
 
 ## Frontend Features
 

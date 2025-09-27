@@ -54,9 +54,9 @@ fi
 print_success "Prerequisites check passed"
 echo ""
 
-# Check if we're in the right directory
-if [ ! -f "workers/wrangler.toml" ]; then
-    print_error "Please run this script from the sso.broker root directory"
+# Check if we're in the right directory (scripts folder)
+if [ ! -f "../workers/wrangler.toml" ]; then
+    print_error "Please run this script from the scripts directory"
     exit 1
 fi
 
@@ -95,7 +95,7 @@ print_status "Uploading secrets to Cloudflare..."
 
 # Upload master secret
 print_status "Uploading master secret..."
-cd workers
+cd ../workers
 echo "$MASTER_SECRET" | wrangler secret put MASTER_SECRET
 print_success "Master secret uploaded"
 
@@ -108,7 +108,7 @@ print_success "SAML certificate uploaded"
 print_status "Uploading SAML private key..."
 echo "$SAML_PRIVATE_KEY" | wrangler secret put SAML_PRIVATE_KEY
 print_success "SAML private key uploaded"
-cd ..
+cd ../scripts
 
 echo ""
 echo -e "${GREEN}🎉 All secrets and certificates have been generated and uploaded!${NC}"

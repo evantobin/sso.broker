@@ -5,12 +5,13 @@ This document explains how to manage certificates and secrets for the sso.broker
 ## Quick Start
 
 ```bash
+cd scripts
 ./updatecerts.sh
 ```
 
 ## What This Script Does
 
-### `updatecerts.sh`
+### `scripts/updatecerts.sh`
 - Generates a 32-byte master secret
 - Creates a 2048-bit RSA private key
 - Generates a SAML certificate valid for 10 years
@@ -39,6 +40,7 @@ This document explains how to manage certificates and secrets for the sso.broker
 ### Fresh Certificates Anytime
 Run the script anytime to generate fresh certificates:
 ```bash
+cd scripts
 ./updatecerts.sh
 ```
 
@@ -68,14 +70,22 @@ npm install -g wrangler
 
 ### Permission Denied
 ```bash
-chmod +x updatecerts.sh
+chmod +x scripts/updatecerts.sh
+```
+
+### Wrong Directory
+```bash
+# Make sure you're in the scripts directory
+cd scripts
+./updatecerts.sh
 ```
 
 ## File Structure After Running Scripts
 
 ```
 sso.broker/
-├── updatecerts.sh                 # Certificate generation script
+├── scripts/
+│   └── updatecerts.sh             # Certificate generation script
 └── workers/
     └── wrangler.toml              # Cloudflare Worker configuration
 ```

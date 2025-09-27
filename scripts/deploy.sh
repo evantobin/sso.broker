@@ -43,20 +43,20 @@ if ! command -v wrangler &> /dev/null; then
 fi
 
 echo "🔨 Building frontend..."
-cd frontend
+cd ../frontend
 npm install
 npm run build
-cd ..
+cd ../scripts
 
 echo "🚀 Deploying Cloudflare Worker..."
-cd workers
+cd ../workers
 wrangler deploy
-cd ..
+cd ../scripts
 
 echo "🌐 Deploying frontend to Cloudflare Pages..."
-cd frontend
+cd ../frontend
 wrangler pages deploy dist --project-name=sso-broker-frontend --branch main
-cd ..
+cd ../scripts
 
 echo "🔧 Setting up worker routes..."
 
