@@ -21,9 +21,5 @@ GITHUB_CLIENT_ID = "Iv23libbe6N7MUtBWv6C"
 # MASTER_SECRET (for signing client credentials)
 
 # SAML Configuration (set via: wrangler secret put SECRET_NAME)
-# APPLE_SAML_CERT
-# APPLE_SAML_PRIVATE_KEY
-# GOOGLE_SAML_CERT
-# GOOGLE_SAML_PRIVATE_KEY
-# GITHUB_SAML_CERT
-# GITHUB_SAML_PRIVATE_KEY
+# SAML_CERT (shared certificate for all SAML providers)
+# SAML_PRIVATE_KEY (shared private key for all SAML providers)

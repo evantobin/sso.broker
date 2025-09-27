@@ -8,24 +8,24 @@ export function getSamlConfigs(env) {
       entityId: 'apple-saml.sso.broker',
       ssoUrl: 'https://apple-saml.sso.broker/saml/sso',
       sloUrl: 'https://apple-saml.sso.broker/saml/slo',
-      x509cert: env.APPLE_SAML_CERT || '',
-      privateKey: env.APPLE_SAML_PRIVATE_KEY || '',
+      x509cert: env.SAML_CERT || '',
+      privateKey: env.SAML_PRIVATE_KEY || '',
       nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
     },
     'google-saml': {
       entityId: 'google-saml.sso.broker',
       ssoUrl: 'https://google-saml.sso.broker/saml/sso',
       sloUrl: 'https://google-saml.sso.broker/saml/slo',
-      x509cert: env.GOOGLE_SAML_CERT || '',
-      privateKey: env.GOOGLE_SAML_PRIVATE_KEY || '',
+      x509cert: env.SAML_CERT || '',
+      privateKey: env.SAML_PRIVATE_KEY || '',
       nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
     },
     'github-saml': {
       entityId: 'github-saml.sso.broker',
       ssoUrl: 'https://github-saml.sso.broker/saml/sso',
       sloUrl: 'https://github-saml.sso.broker/saml/slo',
-      x509cert: env.GITHUB_SAML_CERT || '',
-      privateKey: env.GITHUB_SAML_PRIVATE_KEY || '',
+      x509cert: env.SAML_CERT || '',
+      privateKey: env.SAML_PRIVATE_KEY || '',
       nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
     }
   };
