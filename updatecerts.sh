@@ -82,7 +82,8 @@ print_success "SAML certificate generated"
 
 
 # Read the certificate and private key
-SAML_CERT=$(cat "$TEMP_DIR/saml-cert.pem")
+# For SAML metadata, we need just the base64 content without PEM markers
+SAML_CERT=$(openssl x509 -in "$TEMP_DIR/saml-cert.pem" -outform der | base64 -w 0)
 SAML_PRIVATE_KEY=$(cat "$TEMP_DIR/saml-private-key.pem")
 
 # Clean up temporary files
