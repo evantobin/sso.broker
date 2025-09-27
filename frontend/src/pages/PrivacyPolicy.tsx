@@ -4,18 +4,18 @@ export default function PrivacyPolicy() {
       {/* Content */}
       <div className="container mx-auto px-6 py-12">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8" style={{ color: 'var(--text-primary)' }}>
+          <h1 className="text-4xl font-bold mb-8 text-primary">
             Privacy Policy
           </h1>
           
-          <div className="prose prose-lg max-w-none" style={{ color: 'var(--text-secondary)' }}>
+          <div className="prose prose-lg max-w-none text-secondary">
             <p className="text-lg mb-6">
               Last updated: January 2025
             </p>
 
             <div className="space-y-8">
               <section>
-                <h2 className="text-2xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                <h2 className="text-2xl font-semibold mb-4 text-primary">
                   No Data Storage
                 </h2>
                 <p>
@@ -26,7 +26,7 @@ export default function PrivacyPolicy() {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                <h2 className="text-2xl font-semibold mb-4 text-primary">
                   Stateless Operation
                 </h2>
                 <p>
@@ -37,7 +37,7 @@ export default function PrivacyPolicy() {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                <h2 className="text-2xl font-semibold mb-4 text-primary">
                   No Tracking
                 </h2>
                 <p>
@@ -48,7 +48,7 @@ export default function PrivacyPolicy() {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                <h2 className="text-2xl font-semibold mb-4 text-primary">
                   Transparent Operation
                 </h2>
                 <p>
@@ -60,7 +60,7 @@ export default function PrivacyPolicy() {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                <h2 className="text-2xl font-semibold mb-4 text-primary">
                   Third-Party Services
                 </h2>
                 <p>
@@ -71,7 +71,7 @@ export default function PrivacyPolicy() {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                <h2 className="text-2xl font-semibold mb-4 text-primary">
                   Logs and Monitoring
                 </h2>
                 <p>
@@ -82,7 +82,7 @@ export default function PrivacyPolicy() {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                <h2 className="text-2xl font-semibold mb-4 text-primary">
                   Data Security
                 </h2>
                 <p>
@@ -92,7 +92,7 @@ export default function PrivacyPolicy() {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                <h2 className="text-2xl font-semibold mb-4 text-primary">
                   Changes to This Policy
                 </h2>
                 <p>
@@ -103,12 +103,12 @@ export default function PrivacyPolicy() {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                <h2 className="text-2xl font-semibold mb-4 text-primary">
                   Contact Information
                 </h2>
                 <p>
                   If you have any questions about this Privacy Policy, please contact us at{' '}
-                  <a href="mailto:help@sso.broker" className="text-blue-600 hover:text-blue-700">
+                  <a href="mailto:help@sso.broker">
                     help@sso.broker
                   </a>.
                 </p>

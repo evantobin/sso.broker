@@ -38,14 +38,14 @@ export default function Home() {
       {/* Hero Section */}
       <section className="container mx-auto px-6 py-20 text-center">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6" style={{ color: 'var(--text-primary)' }}>
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-primary">
             Skip the OAuth & SAML Setup Complexity
           </h1>
-          <p className="text-xl leading-relaxed mb-6" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-xl leading-relaxed mb-6 text-secondary">
             Setting up Sign in with Apple, Google Sign-In, and GitHub OAuth/SAML is complex and time-consuming. 
             If your app just needs basic login without additional permissions, this is much easier.
           </p>
-          <p className="text-lg leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+          <p className="text-lg leading-relaxed text-secondary">
             One unified provider that handles Apple, Google, and GitHub authentication for you - supporting both OIDC and SAML protocols.
           </p>
         </div>
@@ -54,52 +54,42 @@ export default function Home() {
       {/* Quick Start Section */}
       <section id="docs" className="py-20">
         <div className="container mx-auto px-6">
-          <h2 className="text-3xl font-bold text-center mb-16" style={{ color: 'var(--text-primary)' }}>Get Started in 4 Steps</h2>
+          <h2 className="text-3xl font-bold text-center mb-16 text-primary">Get Started in 4 Steps</h2>
           
           {/* Provider Format Selection */}
           {!providerFormat && (
             <div className="max-w-4xl mx-auto mb-12">
-              <h3 className="text-xl font-semibold mb-6" style={{ color: 'var(--text-primary)' }}>1. Choose Your Protocol</h3>
-              <p className="text-lg mb-8" style={{ color: 'var(--text-secondary)' }}>
+              <h3 className="text-xl font-semibold mb-6 text-primary">1. Choose Your Protocol</h3>
+              <p className="text-lg mb-8 text-secondary">
                 Select whether your client application uses OAuth or SAML for authentication:
               </p>
               <div className="grid md:grid-cols-2 gap-6">
                 <button
                   onClick={() => setProviderFormat('oauth')}
-                  className="p-6 rounded-lg border-2 transition-all hover:scale-105"
-                  style={{ 
-                    backgroundColor: 'var(--bg-primary)', 
-                    borderColor: 'var(--border-primary)',
-                    borderStyle: 'solid'
-                  }}
+                  className="p-6 rounded-lg border-2 border-solid transition-all hover:scale-105 bg-primary border-primary"
                 >
                   <div className="text-center">
                     <div className="text-4xl mb-4">🔐</div>
-                    <h4 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>OAuth</h4>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    <h4 className="text-xl font-semibold mb-2 text-primary">OAuth</h4>
+                    <p className="text-sm text-secondary">
                       Modern, REST-based authentication. Perfect for web apps, mobile apps, and APIs.
                     </p>
-                    <div className="mt-4 text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                    <div className="mt-4 text-xs text-tertiary">
                       Uses: <code>*.sso.broker</code> subdomains
                     </div>
                   </div>
                 </button>
                 <button
                   onClick={() => setProviderFormat('saml')}
-                  className="p-6 rounded-lg border-2 transition-all hover:scale-105"
-                  style={{ 
-                    backgroundColor: 'var(--bg-primary)', 
-                    borderColor: 'var(--border-primary)',
-                    borderStyle: 'solid'
-                  }}
+                  className="p-6 rounded-lg border-2 transition-all hover:scale-105 bg-primary border-primary border-solid"
                 >
                   <div className="text-center">
                     <div className="text-4xl mb-4">🏢</div>
-                    <h4 className="text-xl font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>SAML</h4>
-                    <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                    <h4 className="text-xl font-semibold mb-2 text-primary">SAML</h4>
+                    <p className="text-sm text-secondary">
                       Enterprise-grade authentication. Ideal for corporate applications and SSO integrations.
                     </p>
-                    <div className="mt-4 text-xs" style={{ color: 'var(--text-tertiary)' }}>
+                    <div className="mt-4 text-xs text-tertiary">
                       Uses: <code>*-saml.sso.broker</code> subdomains
                     </div>
                   </div>
@@ -112,16 +102,12 @@ export default function Home() {
           {providerFormat && (
             <div className="max-w-4xl mx-auto mb-12">
               <div className="flex items-center justify-between mb-6">
-                <h3 className="text-xl font-semibold" style={{ color: 'var(--text-primary)' }}>
+                <h3 className="text-xl font-semibold text-primary">
                   {providerFormat === 'oauth' ? '2. Choose Your OAuth Provider' : '2. Choose Your SAML Provider'}
                 </h3>
                 <button
                   onClick={() => setProviderFormat(null)}
-                  className="text-sm px-3 py-1 rounded transition-colors"
-                  style={{ 
-                    backgroundColor: 'var(--button-secondary)', 
-                    color: 'var(--text-primary)' 
-                  }}
+                  className="text-sm px-3 py-1 rounded transition-colors btn-secondary"
                 >
                   ← Back to Protocol Selection
                 </button>
@@ -189,26 +175,27 @@ export default function Home() {
                 </button>
               </div>
               
-              <div className="p-6 rounded-lg border" style={{ backgroundColor: 'var(--bg-secondary)', borderColor: 'var(--border-primary)' }}>
+              <div className="p-6 rounded-lg border bg-secondary border-primary">
                 <div className="flex items-center justify-between mb-4">
-                  <span className="text-sm font-medium" style={{ color: 'var(--text-secondary)' }}>
+                  <span className="text-sm font-medium text-secondary">
                     {providerFormat === 'oauth' ? 'Your OIDC Issuer' : 'Your SAML Entity ID'}
                   </span>
                   <button 
                     onClick={() => copyToClipboard(providerFormat === 'oauth' 
                       ? `https://${activeTab}.sso.broker` 
-                      : `https://${activeTab}-saml.sso.broker`)}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      : `${activeTab}-saml.sso.broker`)}
+                    className="text-sm font-medium"
+                    text-secondary
                   >
                     {copiedText === (providerFormat === 'oauth' 
                       ? `https://${activeTab}.sso.broker` 
-                      : `https://${activeTab}-saml.sso.broker`) ? 'Copied!' : 'Copy'}
+                      : `${activeTab}-saml.sso.broker`) ? 'Copied!' : 'Copy'}
                   </button>
                 </div>
-                <code className="text-lg font-mono" style={{ color: 'var(--text-primary)' }}>
+                <code className="text-lg font-mono" text-primary>
                   {providerFormat === 'oauth' 
                     ? `https://${activeTab}.sso.broker` 
-                    : `https://${activeTab}-saml.sso.broker`}
+                    : `${activeTab}-saml.sso.broker`}
                 </code>
               </div>
             </div>
@@ -244,15 +231,15 @@ export default function Home() {
 
               {/* Technical Details Section - Only show for OAuth */}
               {providerFormat === 'oauth' && (
-                <div className="mt-8 p-6 rounded-lg border" style={{ backgroundColor: 'var(--bg-primary)', borderColor: 'var(--border-primary)' }}>
+                <div className="mt-8 p-6 rounded-lg border bg-primary border-primary">
                   <div className="flex items-center mb-4">
-                    <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mr-3" style={{ backgroundColor: 'var(--button-primary)', color: 'var(--bg-primary)' }}>⚙️</div>
-                    <h3 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>Technical Details</h3>
+                    <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm mr-3 btn-primary">⚙️</div>
+                    <h3 className="text-lg font-semibold text-primary">Technical Details</h3>
                   </div>
                   <div className="grid sm:grid-cols-1 md:grid-cols-3 gap-4">
-                    <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                      <h4 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>🔄 Token Exchange</h4>
-                      <p className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
+                    <div className="p-4 rounded-lg bg-secondary">
+                      <h4 className="font-semibold mb-2 text-primary">🔄 Token Exchange</h4>
+                      <p className="text-sm mb-2 text-secondary">
                         Exchange the authorization code for access and ID tokens.
                       </p>
                       <div className="relative">
@@ -264,11 +251,7 @@ export default function Home() {
   -d "redirect_uri=https://myapp.com/callback" \\
   -d "client_id=c<client_id>" \\
   -d "client_secret=s<client_secret>"`)}
-                          className="absolute top-2 right-2 z-10 px-2 py-1 rounded text-xs transition-colors"
-                          style={{ 
-                            backgroundColor: 'var(--copy-button-bg)', 
-                            color: 'var(--copy-button-text)' 
-                          }}
+                          className="absolute top-2 right-2 z-10 px-2 py-1 rounded text-xs transition-colors copy-btn"
                           onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = 'var(--copy-button-hover)';
                           }}
@@ -309,9 +292,9 @@ export default function Home() {
                         </SyntaxHighlighter>
                       </div>
                     </div>
-                    <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                      <h4 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>📧 Token Response</h4>
-                      <p className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
+                    <div className="p-4 rounded-lg bg-secondary">
+                      <h4 className="font-semibold mb-2 text-primary">📧 Token Response</h4>
+                      <p className="text-sm mb-2 text-secondary">
                         The user's email is included directly in the token exchange response for immediate access.
                       </p>
                       <div className="relative">
@@ -324,11 +307,7 @@ export default function Home() {
   "scope": "user:email",
   "email": "user@example.com"
 }`)}
-                          className="absolute top-2 right-2 z-10 px-2 py-1 rounded text-xs transition-colors"
-                          style={{ 
-                            backgroundColor: 'var(--copy-button-bg)', 
-                            color: 'var(--copy-button-text)' 
-                          }}
+                          className="absolute top-2 right-2 z-10 px-2 py-1 rounded text-xs transition-colors copy-btn"
                           onMouseEnter={(e) => {
                             e.currentTarget.style.backgroundColor = 'var(--copy-button-hover)';
                           }}
@@ -370,12 +349,12 @@ export default function Home() {
                         </SyntaxHighlighter>
                       </div>
                     </div>
-                    <div className="p-4 rounded-lg" style={{ backgroundColor: 'var(--bg-secondary)' }}>
-                      <h4 className="font-semibold mb-2" style={{ color: 'var(--text-primary)' }}>🔐 Cryptographic Security</h4>
-                      <p className="text-sm mb-2" style={{ color: 'var(--text-secondary)' }}>
+                    <div className="p-4 rounded-lg bg-secondary">
+                      <h4 className="font-semibold mb-2 text-primary">🔐 Cryptographic Security</h4>
+                      <p className="text-sm mb-2 text-secondary">
                         Client IDs are cryptographically signed and contain all necessary information for validation.
                       </p>
-                      <ul className="text-sm space-y-1" style={{ color: 'var(--text-secondary)' }}>
+                      <ul className="text-sm space-y-1 text-secondary">
                         <li>• No storage required - stateless validation</li>
                         <li>• Cryptographically signed for security</li>
                         <li>• Contains app name and redirect URIs</li>

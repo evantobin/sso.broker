@@ -4,18 +4,18 @@ export default function TermsOfService() {
       {/* Content */}
       <div className="container mx-auto px-6 py-12">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold mb-8" style={{ color: 'var(--text-primary)' }}>
+          <h1 className="text-4xl font-bold mb-8 text-primary">
             Terms of Service
           </h1>
           
-          <div className="prose prose-lg max-w-none" style={{ color: 'var(--text-secondary)' }}>
+          <div className="prose prose-lg max-w-none text-secondary">
             <p className="text-lg mb-6">
               Last updated: January 2025
             </p>
 
             <div className="space-y-8">
               <section>
-                <h2 className="text-2xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                <h2 className="text-2xl font-semibold mb-4 text-primary">
                   Best Effort Service
                 </h2>
                 <p>
@@ -26,7 +26,7 @@ export default function TermsOfService() {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                <h2 className="text-2xl font-semibold mb-4 text-primary">
                   No Warranties
                 </h2>
                 <p>
@@ -37,7 +37,7 @@ export default function TermsOfService() {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                <h2 className="text-2xl font-semibold mb-4 text-primary">
                   No Liability
                 </h2>
                 <p>
@@ -48,7 +48,7 @@ export default function TermsOfService() {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                <h2 className="text-2xl font-semibold mb-4 text-primary">
                   Service Changes
                 </h2>
                 <p>
@@ -59,7 +59,7 @@ export default function TermsOfService() {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                <h2 className="text-2xl font-semibold mb-4 text-primary">
                   Acceptable Use
                 </h2>
                 <p>
@@ -70,12 +70,12 @@ export default function TermsOfService() {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold mb-4" style={{ color: 'var(--text-primary)' }}>
+                <h2 className="text-2xl font-semibold mb-4 text-primary">
                   Contact Information
                 </h2>
                 <p>
                   If you have any questions about these Terms of Service, please contact us at{' '}
-                  <a href="mailto:help@sso.broker" className="text-blue-600 hover:text-blue-700">
+                  <a href="mailto:help@sso.broker">
                     help@sso.broker
                   </a>.
                 </p>

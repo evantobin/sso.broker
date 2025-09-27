@@ -5,7 +5,7 @@ import { validateSignedEmailCode } from './crypto.js';
 export function getSamlConfigs(env) {
   return {
     'apple-saml': {
-      entityId: 'https://apple-saml.sso.broker',
+      entityId: 'apple-saml.sso.broker',
       ssoUrl: 'https://apple-saml.sso.broker/saml/sso',
       sloUrl: 'https://apple-saml.sso.broker/saml/slo',
       x509cert: env.APPLE_SAML_CERT || '',
@@ -13,7 +13,7 @@ export function getSamlConfigs(env) {
       nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
     },
     'google-saml': {
-      entityId: 'https://google-saml.sso.broker',
+      entityId: 'google-saml.sso.broker',
       ssoUrl: 'https://google-saml.sso.broker/saml/sso',
       sloUrl: 'https://google-saml.sso.broker/saml/slo',
       x509cert: env.GOOGLE_SAML_CERT || '',
@@ -21,7 +21,7 @@ export function getSamlConfigs(env) {
       nameIdFormat: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress'
     },
     'github-saml': {
-      entityId: 'https://github-saml.sso.broker',
+      entityId: 'github-saml.sso.broker',
       ssoUrl: 'https://github-saml.sso.broker/saml/sso',
       sloUrl: 'https://github-saml.sso.broker/saml/slo',
       x509cert: env.GITHUB_SAML_CERT || '',

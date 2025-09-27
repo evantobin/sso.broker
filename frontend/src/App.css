@@ -90,6 +90,87 @@ button {
   transition: all 0.15s ease-in-out;
 }
 
+/* Global link styles */
+a {
+  color: var(--text-secondary);
+  text-decoration: none;
+  transition: opacity 0.15s ease-in-out;
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+a:visited {
+  color: var(--text-secondary);
+}
+
+/* Utility classes for colors and backgrounds */
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
+
+.bg-primary { background-color: var(--bg-primary); }
+.bg-secondary { background-color: var(--bg-secondary); }
+.bg-tertiary { background-color: var(--bg-tertiary); }
+
+.border-primary { border-color: var(--border-primary); }
+.border-secondary { border-color: var(--border-secondary); }
+
+/* Button styles */
+.btn-primary {
+  background-color: var(--button-primary);
+  color: var(--bg-primary);
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-primary:hover {
+  background-color: var(--button-primary-hover);
+}
+
+.btn-secondary {
+  background-color: var(--button-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-primary);
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-secondary:hover {
+  background-color: var(--button-secondary-hover);
+}
+
+/* Copy button styles */
+.copy-btn {
+  background-color: var(--copy-button-bg);
+  color: var(--copy-button-text);
+  transition: all 0.15s ease-in-out;
+}
+
+.copy-btn:hover {
+  background-color: var(--copy-button-hover);
+}
+
+/* Code block styles */
+.code-bg {
+  background: var(--code-bg);
+}
+
+/* Brand/logo styles */
+.brand-logo {
+  color: var(--text-primary);
+  font-family: "JetBrains Mono", "Fira Code", "Monaco", "Consolas", monospace;
+  letter-spacing: -0.02em;
+  font-variant: small-caps;
+}
+
+.brand-logo-large {
+  font-size: 1.75rem;
+}
+
+.brand-logo-medium {
+  font-size: 1.5rem;
+}
+
 /* Responsive design improvements */
 @media (max-width: 768px) {
   .container {

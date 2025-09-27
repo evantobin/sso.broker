@@ -1,7 +1,7 @@
 // Cloudflare Worker entry point for OIDC and SAML broker
 // This is a scaffold for sso.broker
 
-import { generateClientId, generateClientSecret, validateClientCredentials, validateSignedEmailCode } from './src/crypto.js';
+import { generateClientId, generateClientSecret, validateClientCredentials, validateSignedEmailCode, generateSignedEmailCode } from './src/crypto.js';
 import { getProviderConfigs, getProviderFromHost, getUserEmailFromProvider, showConsentScreen, generateIdToken } from './src/oidc.js';
 import { getSamlConfigs, getSamlProviderFromHost, generateSamlMetadata, parseSamlRequest, generateSamlResponse, signSamlResponse, showSamlConsentScreen } from './src/saml.js';
 import { CORS_HEADERS, jsonResponse, errorResponse, logRequest, logError } from './src/utils.js';
@@ -420,7 +420,7 @@ async function handleSamlRequest(request, env, url, pathname, host) {
       return errorResponse('SAML provider not found for this subdomain', 404);
     }
     
-    const metadata = generateSamlMetadata(config, url.origin);
+    const metadata = generateSamlMetadata(providerKey, config);
     
     return new Response(metadata, {
       headers: {
@@ -450,7 +450,7 @@ async function handleSamlRequest(request, env, url, pathname, host) {
       }
       
       // Show consent screen for SAML authentication
-      return await showSamlConsentScreen(url, requestData.entityId, requestData.acsUrl, relayState, providerKey, env);
+      return await showSamlConsentScreen(url, requestData.issuer, requestData.assertionConsumerServiceURL, relayState, providerKey, env);
     } catch (error) {
       logError(error, { action: 'saml_sso', provider: providerKey }, env);
       return errorResponse('Failed to process SAML request', 500);
@@ -506,12 +506,12 @@ async function handleSamlRequest(request, env, url, pathname, host) {
         const userEmail = 'user@example.com';
         
         const requestData = {
-          entityId: spEntityId,
-          acsUrl: acsUrl,
-          inResponseTo: crypto.randomUUID() // In production, extract from original request
+          assertionConsumerServiceURL: acsUrl,
+          id: crypto.randomUUID(), // In production, extract from original request
+          issuer: spEntityId
         };
         
-        const samlResponse = await generateSamlResponse(config, userEmail, requestData, url.origin);
+        const samlResponse = await generateSamlResponse(requestData, userEmail, config);
         const signedResponse = await signSamlResponse(samlResponse, config.privateKey);
         
         // Return SAML response as HTML form for POST binding
