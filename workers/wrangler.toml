@@ -11,7 +11,7 @@ workers_dev = true
 ENVIRONMENT = "development"
 # Client IDs (public identifiers - safe to hardcode)
 APPLE_CLIENT_ID = "your-apple-client-id-here"
-GOOGLE_CLIENT_ID = "your-google-client-id-here"
+GOOGLE_CLIENT_ID = "576821248153-hqdde1vhla24i1127rcskhlqjfvq8lou.apps.googleusercontent.com"
 GITHUB_CLIENT_ID = "Iv23libbe6N7MUtBWv6C"
 
 # Secrets (set via: wrangler secret put SECRET_NAME)

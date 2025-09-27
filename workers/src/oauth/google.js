@@ -1,6 +1,6 @@
 // Google OAuth provider implementation
 
-export async function getGoogleUserEmail(code, config) {
+export async function getGoogleUserEmail(code, config, redirectUri = null) {
   // Exchange code for access token
   const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
@@ -12,7 +12,7 @@ export async function getGoogleUserEmail(code, config) {
       client_secret: config.clientSecret,
       code: code,
       grant_type: 'authorization_code',
-      redirect_uri: config.redirectUri,
+      redirect_uri: redirectUri || config.redirectUri,
     }),
   });
 

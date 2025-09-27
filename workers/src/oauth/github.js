@@ -1,6 +1,6 @@
 // GitHub OAuth provider implementation
 
-export async function getGitHubUserEmail(code, config) {
+export async function getGitHubUserEmail(code, config, redirectUri = null) {
   // Exchange code for access token
   const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
     method: 'POST',

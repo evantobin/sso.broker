@@ -1,6 +1,6 @@
 // Apple OAuth provider implementation
 
-export async function getAppleUserEmail(code, config) {
+export async function getAppleUserEmail(code, config, redirectUri = null) {
   // Apple OAuth implementation
   // Note: Apple OAuth is more complex and requires JWT signing
   // This is a placeholder implementation

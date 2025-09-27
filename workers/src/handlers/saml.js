@@ -115,6 +115,7 @@ export async function handleSamlRequest(request, env, url, pathname, host) {
           }
           
           // Redirect to actual OAuth provider (not our own domain)
+          // For SAML flows, use the current domain with /saml/oauth-callback
           const oauthUrl = getOAuthUrl(oauthProvider, oauthConfig, `${url.origin}/saml/oauth-callback`, stateToken);
           
           return Response.redirect(oauthUrl, 302);
@@ -178,7 +179,7 @@ export async function handleSamlRequest(request, env, url, pathname, host) {
         return errorResponse(`OAuth provider ${oauthProvider} not configured`, 500);
       }
       
-      const userEmail = await getUserEmailFromOAuthProvider(oauthProvider, code, oauthConfig);
+      const userEmail = await getUserEmailFromOAuthProvider(oauthProvider, code, oauthConfig, `${url.origin}/saml/oauth-callback`);
       
       if (!userEmail) {
         return errorResponse('Failed to get user email from provider', 400);

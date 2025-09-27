@@ -5,15 +5,15 @@ import { getGoogleUserEmail, getGoogleOAuthUrl } from './google.js';
 import { getAppleUserEmail, getAppleOAuthUrl } from './apple.js';
 
 // Provider-specific OAuth token exchange functions
-export async function getUserEmailFromOAuthProvider(provider, code, config) {
+export async function getUserEmailFromOAuthProvider(provider, code, config, redirectUri = null) {
   try {
     switch (provider) {
       case 'github':
-        return await getGitHubUserEmail(code, config);
+        return await getGitHubUserEmail(code, config, redirectUri);
       case 'google':
-        return await getGoogleUserEmail(code, config);
+        return await getGoogleUserEmail(code, config, redirectUri);
       case 'apple':
-        return await getAppleUserEmail(code, config);
+        return await getAppleUserEmail(code, config, redirectUri);
       default:
         throw new Error(`Unsupported provider: ${provider}`);
     }
