@@ -1,0 +1,183 @@
+/* CSS Custom Properties for theming */
+:root {
+  --bg-primary: #ffffff;
+  --bg-secondary: #f9fafb;
+  --bg-tertiary: #f3f4f6;
+  --text-primary: #111827;
+  --text-secondary: #6b7280;
+  --text-tertiary: #9ca3af;
+  --border-primary: #e5e7eb;
+  --border-secondary: #d1d5db;
+  --button-primary: #111827;
+  --button-primary-hover: #374151;
+  --button-secondary: #f3f4f6;
+  --button-secondary-hover: #e5e7eb;
+  --code-bg: #f8fafc;
+  --copy-button-bg: #111827;
+  --copy-button-hover: #374151;
+  --copy-button-text: #ffffff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg-primary: #111827;
+    --bg-secondary: #1f2937;
+    --bg-tertiary: #374151;
+    --text-primary: #f9fafb;
+    --text-secondary: #d1d5db;
+    --text-tertiary: #9ca3af;
+    --border-primary: #374151;
+    --border-secondary: #4b5563;
+    --button-primary: #f9fafb;
+    --button-primary-hover: #e5e7eb;
+    --button-secondary: #374151;
+    --button-secondary-hover: #4b5563;
+    --code-bg: #1f2937;
+    --copy-button-bg: #f9fafb;
+    --copy-button-hover: #e5e7eb;
+    --copy-button-text: #111827;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--text-tertiary);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-secondary);
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Code block styling */
+pre {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  line-height: 1.5;
+  overflow-x: auto;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+/* Ensure code blocks don't overflow */
+pre code {
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+
+/* Force break long URLs and code strings */
+pre, code {
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  hyphens: none;
+}
+
+/* Button hover effects */
+button {
+  transition: all 0.15s ease-in-out;
+}
+
+/* Responsive design improvements */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+  }
+  
+  .grid {
+    gap: 1rem;
+  }
+  
+  /* Make code blocks more responsive on mobile */
+  pre {
+    font-size: 0.75rem;
+    padding: 0.75rem;
+  }
+  
+  /* Ensure code containers don't overflow on mobile */
+  .max-w-4xl {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+  
+  /* Make syntax highlighter containers more mobile-friendly */
+  .syntax-highlighter-override {
+    font-size: 0.7rem !important;
+    padding: 0.75rem !important;
+  }
+}
+
+/* Prevent horizontal overflow and set background */
+html, body {
+  overflow-x: hidden;
+  background-color: var(--bg-primary);
+  min-height: 100vh;
+}
+
+/* Ensure all containers respect viewport width */
+.container {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Override syntax highlighter styles for mobile responsiveness */
+.syntax-highlighter-override pre {
+  white-space: pre-wrap !important;
+  word-break: break-all !important;
+  overflow-wrap: break-word !important;
+  overflow-x: auto !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+  min-width: 0 !important;
+}
+
+.syntax-highlighter-override pre code {
+  white-space: pre-wrap !important;
+  word-break: break-all !important;
+  overflow-wrap: break-word !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Additional mobile-specific overrides */
+@media (max-width: 768px) {
+  .syntax-highlighter-override pre {
+    font-size: 0.7rem !important;
+    padding: 0.75rem !important;
+    line-height: 1.4 !important;
+  }
+  
+  .syntax-highlighter-override pre code {
+    font-size: 0.7rem !important;
+  }
+  
+  /* Ensure all containers prevent horizontal overflow */
+  .relative {
+    overflow-x: hidden;
+    max-width: 100%;
+  }
+  
+  /* Force break long URLs and code */
+  .syntax-highlighter-override {
+    word-break: break-all !important;
+    overflow-wrap: anywhere !important;
+  }
+}

@@ -1,0 +1,21 @@
+name = "sso-broker"
+main = "worker.js"
+compatibility_date = "2025-09-27"
+compatibility_flags = ["nodejs_compat"]
+account_id = "8f44c3760fd7f6aa617b39467f513b48"
+workers_dev = true
+
+# Environment variables
+[vars]
+# Environment setting (development/production)
+ENVIRONMENT = "development"
+# Client IDs (public identifiers - safe to hardcode)
+APPLE_CLIENT_ID = "your-apple-client-id-here"
+GOOGLE_CLIENT_ID = "your-google-client-id-here"
+GITHUB_CLIENT_ID = "Iv23libbe6N7MUtBWv6C"
+
+# Secrets (set via: wrangler secret put SECRET_NAME)
+# APPLE_CLIENT_SECRET  
+# GOOGLE_CLIENT_SECRET
+# GITHUB_CLIENT_SECRET
+# MASTER_SECRET (for signing client credentials)

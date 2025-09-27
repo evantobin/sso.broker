@@ -74,28 +74,6 @@ curl -X POST https://github.sso.broker/register \
 
 **Total setup time: 5 minutes** ⏱️
 
-## Features
-
-### 🔐 **Cryptographic Security**
-- **Stateless Client Credentials**: Client IDs and secrets are cryptographically signed, no storage required
-- **App Isolation**: Each app gets a unique GUID-based secret for email encryption
-- **Tamper-Proof**: All credentials are cryptographically signed and validated
-- **Automatic Expiration**: Email codes expire after 1 hour for security
-
-### 🌐 **Multi-Provider Support**
-- **Apple Sign-In**: Full Apple ID integration with private email handling
-- **Google OAuth**: Google account authentication with email retrieval
-- **GitHub OAuth**: GitHub account authentication with email API integration
-- **Extensible**: Easy to add more OAuth providers
-
-### 🚀 **Modern Architecture**
-- **Cloudflare Workers**: Serverless, edge-computing deployment
-- **React Frontend**: Modern, responsive UI with React Router navigation
-- **Multi-Page Application**: Separate pages for Terms of Service and Privacy Policy
-- **OIDC Compliant**: Full OpenID Connect specification support
-- **SAML IDP**: Standards-compliant SAML Identity Provider functionality
-- **JWT Tokens**: Standards-compliant ID tokens with email claims
-- **Dual Protocol Support**: Both OIDC and SAML on separate subdomains
 
 ## How It Works
 
