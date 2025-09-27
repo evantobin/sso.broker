@@ -55,7 +55,7 @@ cd ..
 
 echo "🌐 Deploying frontend to Cloudflare Pages..."
 cd frontend
-wrangler pages deploy dist --project-name=sso-broker-frontend
+wrangler pages deploy dist --project-name=sso-broker-frontend --branch main
 cd ..
 
 echo "🔧 Setting up worker routes..."
