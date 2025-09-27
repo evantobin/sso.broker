@@ -177,12 +177,18 @@ export function generateSamlResponse(request, userEmail, config) {
 // Sign SAML response with XML signature using Web Crypto
 export async function signSamlResponse(samlResponse, privateKeyPem, certificate) {
   try {
+    console.log('Starting SAML response signing...');
+    console.log('Private key present:', !!privateKeyPem);
+    console.log('Certificate present:', !!certificate);
+    
     // Extract the Response ID from the SAML response
     const responseIdMatch = samlResponse.match(/ID="([^"]+)"/);
     const responseId = responseIdMatch ? responseIdMatch[1] : generateResponseId();
+    console.log('Response ID:', responseId);
     
     // Import the private key
     const privateKey = await importPrivateKey(privateKeyPem);
+    console.log('Private key imported successfully');
     
     // Create a simplified canonical form of the response for signing
     // In a full implementation, you'd use proper XML canonicalization
@@ -224,21 +230,35 @@ export async function signSamlResponse(samlResponse, privateKeyPem, certificate)
       <ds:SignatureValue>${signatureValue}</ds:SignatureValue>
       <ds:KeyInfo>
         <ds:X509Data>
-          <ds:X509Certificate>${certificate || 'CERTIFICATE_PLACEHOLDER'}</ds:X509Certificate>
+          <ds:X509Certificate>${cleanCertificate(certificate) || 'CERTIFICATE_PLACEHOLDER'}</ds:X509Certificate>
         </ds:X509Data>
       </ds:KeyInfo>
     </ds:Signature>`;
     
-    // Insert signature after the Response opening tag
-    const finalResponse = samlResponse.replace(
-      '<samlp:Response',
-      `<samlp:Response xmlns:ds="http://www.w3.org/2000/09/xmldsig#"${signatureElement}`
+    // Insert signature as the first child element of the Response
+    // First, add the ds namespace to the Response element
+    let finalResponse = samlResponse.replace(
+      '<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol"',
+      '<samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:ds="http://www.w3.org/2000/09/xmldsig#"'
+    );
+    
+    // Then insert the signature after the Response opening tag, before the first child element
+    // We need to find the actual InResponseTo value from the XML
+    const inResponseToMatch = samlResponse.match(/InResponseTo="([^"]+)"/);
+    const inResponseTo = inResponseToMatch ? inResponseToMatch[1] : '';
+    
+    finalResponse = finalResponse.replace(
+      `InResponseTo="${inResponseTo}">\n  <saml:Issuer>`,
+      `InResponseTo="${inResponseTo}">\n${signatureElement}\n  <saml:Issuer>`
     );
     
     console.log('SAML response signed with Web Crypto');
+    console.log('Final response length:', finalResponse.length);
+    console.log('Signature present in final response:', finalResponse.includes('<ds:Signature'));
     return finalResponse;
   } catch (error) {
     console.error('SAML signing error:', error);
+    console.log('Returning unsigned response due to error');
     // Return unsigned response if signing fails
     return samlResponse;
   }
@@ -289,6 +309,17 @@ function createCanonicalForm(xml) {
 // Generate a unique response ID
 function generateResponseId() {
   return 'id_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
+}
+
+// Clean certificate by removing PEM headers and whitespace
+function cleanCertificate(certificate) {
+  if (!certificate) return null;
+  
+  return certificate
+    .replace(/-----BEGIN CERTIFICATE-----/g, '')
+    .replace(/-----END CERTIFICATE-----/g, '')
+    .replace(/\s/g, '')
+    .trim();
 }
 
 // Show SAML consent screen

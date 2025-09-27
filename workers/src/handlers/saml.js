@@ -192,7 +192,13 @@ export async function handleSamlRequest(request, env, url, pathname, host) {
       };
       
       const samlResponse = await generateSamlResponse(requestData, userEmail, config);
-      const signedResponse = await signSamlResponse(samlResponse, config.privateKey, config.certificate);
+      console.log('Generated SAML response length:', samlResponse.length);
+      console.log('Config private key present:', !!config.privateKey);
+      console.log('Config certificate present:', !!config.x509cert);
+      
+      const signedResponse = await signSamlResponse(samlResponse, config.privateKey, config.x509cert);
+      console.log('Signed response length:', signedResponse.length);
+      console.log('Signature in signed response:', signedResponse.includes('<ds:Signature'));
       
       // Return SAML response as HTML form for POST binding
       const htmlResponse = `
