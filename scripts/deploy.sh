@@ -163,6 +163,21 @@ else
     echo "$GITHUB_SAML_ROUTE_RESULT" | jq -r '.errors[]?.message // "Unknown error"'
 fi
 
+# Test SAML subdomain route (mock SP)
+echo "Creating test-saml subdomain route..."
+TEST_SAML_ROUTE_RESULT=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/workers/routes" \
+  -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  --data "{\"pattern\":\"test-saml.$DOMAIN/*\",\"script\":\"sso-broker\"}")
+
+TEST_SAML_ROUTE_SUCCESS=$(echo "$TEST_SAML_ROUTE_RESULT" | jq -r '.success')
+if [ "$TEST_SAML_ROUTE_SUCCESS" = "true" ]; then
+    echo "✅ Test SAML subdomain route created successfully"
+else
+    echo "❌ Failed to create test-saml subdomain route:"
+    echo "$TEST_SAML_ROUTE_RESULT" | jq -r '.errors[]?.message // "Unknown error"'
+fi
+
 echo "✅ Worker routes created!"
 
 # Create DNS records for subdomains
@@ -261,6 +276,21 @@ else
     echo "$GITHUB_SAML_DNS_RESULT" | jq -r '.errors[]?.message // "Unknown error"'
 fi
 
+# Test SAML subdomain DNS (mock SP)
+echo "Creating test-saml subdomain DNS record..."
+TEST_SAML_DNS_RESULT=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
+  -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  --data "{\"type\":\"CNAME\",\"name\":\"test-saml\",\"content\":\"sso-broker.me-8f4.workers.dev\",\"proxied\":true}")
+
+TEST_SAML_DNS_SUCCESS=$(echo "$TEST_SAML_DNS_RESULT" | jq -r '.success')
+if [ "$TEST_SAML_DNS_SUCCESS" = "true" ]; then
+    echo "✅ Test SAML subdomain DNS record created successfully (proxied)"
+else
+    echo "❌ Failed to create test-saml subdomain DNS record:"
+    echo "$TEST_SAML_DNS_RESULT" | jq -r '.errors[]?.message // "Unknown error"'
+fi
+
 echo "✅ DNS records created!"
 
 # Set up main domain for Pages
@@ -293,6 +323,10 @@ echo "  - Main site: https://sso.broker"
 echo "  - Apple OIDC: https://apple.sso.broker"
 echo "  - Google OIDC: https://google.sso.broker"
 echo "  - GitHub OIDC: https://github.sso.broker"
+echo "  - Apple SAML: https://apple-saml.sso.broker"
+echo "  - Google SAML: https://google-saml.sso.broker"
+echo "  - GitHub SAML: https://github-saml.sso.broker"
+echo "  - Test SAML SP: https://test-saml.sso.broker"
 echo "  - Direct worker: https://sso-broker.me-8f4.workers.dev"
 echo ""
 echo "Next steps:"
@@ -309,4 +343,8 @@ echo "4. Test the endpoints:"
 echo "   - Apple OIDC: https://apple.sso.broker/.well-known/openid-configuration"
 echo "   - Google OIDC: https://google.sso.broker/.well-known/openid-configuration"
 echo "   - GitHub OIDC: https://github.sso.broker/.well-known/openid-configuration"
+echo "   - Apple SAML: https://apple-saml.sso.broker/metadata"
+echo "   - Google SAML: https://google-saml.sso.broker/metadata"
+echo "   - GitHub SAML: https://github-saml.sso.broker/metadata"
+echo "   - Test SAML SP: https://test-saml.sso.broker"
 echo "   - Main site: https://sso.broker"

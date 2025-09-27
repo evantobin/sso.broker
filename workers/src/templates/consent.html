@@ -3,26 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>sso.broker - <%= title %></title>
+    <title>sso.broker - {{title}}</title>
     <style>
+        /* CSS Custom Properties for theming */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --bg-tertiary: #f3f4f6;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --text-tertiary: #9ca3af;
+            --border-primary: #e5e7eb;
+            --border-secondary: #d1d5db;
+            --button-primary: #111827;
+            --button-primary-hover: #374151;
+            --button-secondary: #f3f4f6;
+            --button-secondary-hover: #e5e7eb;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #111827;
+                --bg-secondary: #1f2937;
+                --bg-tertiary: #374151;
+                --text-primary: #f9fafb;
+                --text-secondary: #d1d5db;
+                --text-tertiary: #9ca3af;
+                --border-primary: #374151;
+                --border-secondary: #4b5563;
+                --button-primary: #f9fafb;
+                --button-primary-hover: #e5e7eb;
+                --button-secondary: #374151;
+                --button-secondary-hover: #4b5563;
+            }
+        }
+
         * {
             box-sizing: border-box;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', system-ui, sans-serif;
-            background: #fafafa;
+            background: var(--bg-secondary);
             margin: 0;
             padding: 0;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #0f172a;
+            color: var(--text-primary);
             line-height: 1.5;
         }
         .consent-container {
-            background: white;
-            border: 1px solid #e2e8f0;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-primary);
             border-radius: 8px;
             padding: 32px;
             max-width: 480px;
@@ -34,17 +67,17 @@
             text-align: center;
             margin-bottom: 32px;
             padding-bottom: 24px;
-            border-bottom: 1px solid #f1f5f9;
+            border-bottom: 1px solid var(--border-primary);
         }
         .logo h1 {
-            color: #0f172a;
+            color: var(--text-primary);
             margin: 0;
             font-size: 24px;
             font-weight: 600;
             letter-spacing: -0.025em;
         }
         .logo p {
-            color: #64748b;
+            color: var(--text-secondary);
             margin: 4px 0 0 0;
             font-size: 14px;
             font-weight: 400;
@@ -53,30 +86,30 @@
             margin-bottom: 32px;
         }
         .consent-content h2 {
-            color: #0f172a;
+            color: var(--text-primary);
             font-size: 18px;
             font-weight: 600;
             margin: 0 0 16px 0;
             letter-spacing: -0.025em;
         }
         .consent-content p {
-            color: #475569;
+            color: var(--text-secondary);
             margin: 0 0 16px 0;
             font-size: 14px;
         }
         .app-name {
-            background: #f1f5f9;
-            border: 1px solid #e2e8f0;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-primary);
             border-radius: 6px;
             padding: 12px 16px;
             margin: 16px 0;
             font-weight: 600;
-            color: #0f172a;
+            color: var(--text-primary);
             text-align: center;
         }
         .details {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
             border-radius: 6px;
             padding: 12px 16px;
             margin: 16px 0;
@@ -89,21 +122,21 @@
             font-size: 14px;
         }
         .detail-label {
-            color: #64748b;
+            color: var(--text-secondary);
             font-weight: 500;
         }
         .detail-value {
-            color: #0f172a;
+            color: var(--text-primary);
             font-family: 'SF Mono', 'Monaco', 'Inconsolata', 'Roboto Mono', monospace;
             font-size: 13px;
-            background: #f1f5f9;
+            background: var(--bg-tertiary);
             padding: 2px 6px;
             border-radius: 4px;
             word-break: break-all;
         }
         .provider-badge {
-            background: #0f172a;
-            color: white;
+            background: var(--button-primary);
+            color: var(--bg-primary);
             padding: 2px 8px;
             border-radius: 4px;
             font-size: 12px;
@@ -130,23 +163,23 @@
             display: inline-block;
         }
         .btn-primary {
-            background: #0f172a;
-            color: white;
+            background: var(--button-primary);
+            color: var(--bg-primary);
         }
         .btn-primary:hover {
-            background: #1e293b;
+            background: var(--button-primary-hover);
         }
         .btn-secondary {
-            background: #f8fafc;
-            color: #475569;
-            border: 1px solid #e2e8f0;
+            background: var(--button-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
         }
         .btn-secondary:hover {
-            background: #f1f5f9;
+            background: var(--button-secondary-hover);
         }
         .permissions {
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-primary);
             border-radius: 6px;
             padding: 16px;
             margin: 16px 0;
@@ -155,18 +188,18 @@
             margin: 0 0 12px 0;
             font-size: 14px;
             font-weight: 600;
-            color: #0f172a;
+            color: var(--text-primary);
         }
         .permission-item {
             display: flex;
             align-items: center;
             margin: 8px 0;
             font-size: 14px;
-            color: #475569;
+            color: var(--text-secondary);
         }
         .permission-item::before {
             content: "✓";
-            color: #10b981;
+            color: var(--text-primary);
             font-weight: bold;
             margin-right: 8px;
         }
@@ -174,20 +207,16 @@
 </head>
 <body>
     <div class="consent-container">
-        <div class="logo">
-            <h1>sso.broker</h1>
-            <p>Secure authentication made simple</p>
-        </div>
         
         <div class="consent-content">
-            <h2><%= heading %></h2>
-            <p><%= description %></p>
+            <h2>{{heading}}</h2>
+            <p>{{description}}</p>
             
             <div class="app-name">
-                <%= appName %>
+                {{appName}}
             </div>
             
-            <% if (protocol === 'oidc') { %>
+            {{#oidc}}
                 <div class="permissions">
                     <h3>This app will receive:</h3>
                     <div class="permission-item">Your email address</div>
@@ -197,14 +226,16 @@
                 <div class="details">
                     <div class="detail-row">
                         <span class="detail-label">Provider:</span>
-                        <span class="detail-value provider-badge"><%= providerKey %></span>
+                        <span class="detail-value provider-badge">{{providerKey}}</span>
                     </div>
                     <div class="detail-row">
                         <span class="detail-label">Redirect URI:</span>
-                        <span class="detail-value"><%= redirectUri %></span>
+                        <span class="detail-value">{{redirectUri}}</span>
                     </div>
                 </div>
-            <% } else if (protocol === 'saml') { %>
+            {{/oidc}}
+            
+            {{#saml}}
                 <div class="permissions">
                     <h3>This service will receive:</h3>
                     <div class="permission-item">Your email address</div>
@@ -214,23 +245,23 @@
                 <div class="details">
                     <div class="detail-row">
                         <span class="detail-label">Provider:</span>
-                        <span class="detail-value provider-badge"><%= providerKey %></span>
+                        <span class="detail-value provider-badge">{{providerKey}}</span>
                     </div>
                     <div class="detail-row">
                         <span class="detail-label">Service Provider:</span>
-                        <span class="detail-value"><%= spEntityId %></span>
+                        <span class="detail-value">{{spEntityId}}</span>
                     </div>
                     <div class="detail-row">
                         <span class="detail-label">ACS URL:</span>
-                        <span class="detail-value"><%= acsUrl %></span>
+                        <span class="detail-value">{{acsUrl}}</span>
                     </div>
                 </div>
-            <% } %>
+            {{/saml}}
         </div>
         
         <div class="buttons">
-            <a href="<%= denyUrl %>" class="btn btn-secondary">Deny</a>
-            <a href="<%= allowUrl %>" class="btn btn-primary">Allow</a>
+            <a href="{{denyUrl}}" class="btn btn-secondary">Deny</a>
+            <a href="{{allowUrl}}" class="btn btn-primary">Allow</a>
         </div>
     </div>
 </body>

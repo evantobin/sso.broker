@@ -37,56 +37,9 @@ export function getProviderFromHost(host) {
   return null;
 }
 
-// Get user email from provider
-export async function getUserEmailFromProvider(provider, code, env) {
-  const configs = getProviderConfigs(env);
-  const config = configs[provider];
-  
-  if (!config) {
-    throw new Error(`Unknown provider: ${provider}`);
-  }
-
-  try {
-    // Exchange code for access token
-    const tokenResponse = await fetch(`https://oauth2.googleapis.com/token`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        client_id: config.clientId,
-        client_secret: config.clientSecret,
-        code: code,
-        grant_type: 'authorization_code',
-        redirect_uri: config.redirectUri,
-      }),
-    });
-
-    if (!tokenResponse.ok) {
-      throw new Error(`Token exchange failed: ${tokenResponse.status}`);
-    }
-
-    const tokenData = await tokenResponse.json();
-    const accessToken = tokenData.access_token;
-
-    // Get user info
-    const userResponse = await fetch(`https://www.googleapis.com/oauth2/v2/userinfo`, {
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-      },
-    });
-
-    if (!userResponse.ok) {
-      throw new Error(`User info fetch failed: ${userResponse.status}`);
-    }
-
-    const userData = await userResponse.json();
-    return userData.email;
-  } catch (error) {
-    console.error('Error getting user email:', error);
-    return null;
-  }
-}
+// Note: getUserEmailFromProvider is now handled by the modular OAuth system
+// This function is kept for backward compatibility but should be removed
+// Use getUserEmailFromOAuthProvider from ./oauth/index.js instead
 
 // Show consent screen
 export async function showConsentScreen(url, clientId, state, redirectUri, providerKey, env) {
@@ -131,7 +84,7 @@ export async function showConsentScreen(url, clientId, state, redirectUri, provi
     heading: 'Authorize Application',
     description: 'This application wants to access your account information.',
     appName: clientName,
-    protocol: 'oidc',
+    oidc: true,
     providerKey: providerKey,
     redirectUri: redirectUri,
     allowUrl: `${url}?consent=allow&state=${state}`,

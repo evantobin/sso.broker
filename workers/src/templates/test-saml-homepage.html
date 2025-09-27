@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAML Test Service Provider - sso.broker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: 'var(--text-primary)',
+                            50: 'var(--bg-tertiary)',
+                            100: 'var(--bg-tertiary)',
+                            200: 'var(--border-secondary)',
+                            300: 'var(--border-secondary)',
+                            400: 'var(--text-tertiary)',
+                            500: 'var(--text-secondary)',
+                            600: 'var(--text-secondary)',
+                            700: 'var(--text-primary)',
+                            800: 'var(--text-primary)',
+                            900: 'var(--text-primary)',
+                        },
+                        secondary: {
+                            DEFAULT: 'var(--text-secondary)',
+                        },
+                        tertiary: {
+                            DEFAULT: 'var(--text-tertiary)',
+                        }
+                    },
+                    backgroundColor: {
+                        primary: 'var(--bg-primary)',
+                        secondary: 'var(--bg-secondary)',
+                        tertiary: 'var(--bg-tertiary)',
+                    },
+                    textColor: {
+                        primary: 'var(--text-primary)',
+                        secondary: 'var(--text-secondary)',
+                        tertiary: 'var(--text-tertiary)',
+                    },
+                    borderColor: {
+                        primary: 'var(--border-primary)',
+                        secondary: 'var(--border-secondary)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* CSS Custom Properties for theming */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --bg-tertiary: #f3f4f6;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --text-tertiary: #9ca3af;
+            --border-primary: #e5e7eb;
+            --border-secondary: #d1d5db;
+            --button-primary: #111827;
+            --button-primary-hover: #374151;
+            --button-secondary: #f3f4f6;
+            --button-secondary-hover: #e5e7eb;
+            --code-bg: #f8fafc;
+            --copy-button-bg: #111827;
+            --copy-button-hover: #374151;
+            --copy-button-text: #ffffff;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #111827;
+                --bg-secondary: #1f2937;
+                --bg-tertiary: #374151;
+                --text-primary: #f9fafb;
+                --text-secondary: #d1d5db;
+                --text-tertiary: #9ca3af;
+                --border-primary: #374151;
+                --border-secondary: #4b5563;
+                --button-primary: #f9fafb;
+                --button-primary-hover: #e5e7eb;
+                --button-secondary: #374151;
+                --button-secondary-hover: #4b5563;
+                --code-bg: #1f2937;
+                --copy-button-bg: #f9fafb;
+                --copy-button-hover: #e5e7eb;
+                --copy-button-text: #111827;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-tertiary);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Code block styling */
+        pre {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            line-height: 1.5;
+            overflow-x: auto;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        /* Ensure code blocks don't overflow */
+        pre code {
+            white-space: pre-wrap;
+            word-break: break-all;
+            overflow-wrap: anywhere;
+        }
+
+        /* Force break long URLs and code strings */
+        pre, code {
+            word-break: break-all;
+            overflow-wrap: anywhere;
+            hyphens: none;
+        }
+
+        /* Button hover effects */
+        button {
+            transition: all 0.15s ease-in-out;
+        }
+
+        /* Global link styles */
+        a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: opacity 0.15s ease-in-out;
+        }
+
+        a:hover {
+            opacity: 0.8;
+        }
+
+        a:visited {
+            color: var(--text-secondary);
+        }
+
+        /* Utility classes */
+        .text-primary { color: var(--text-primary); }
+        .text-secondary { color: var(--text-secondary); }
+        .text-tertiary { color: var(--text-tertiary); }
+        .bg-primary { background-color: var(--bg-primary); }
+        .bg-secondary { background-color: var(--bg-secondary); }
+        .bg-tertiary { background-color: var(--bg-tertiary); }
+        .border-primary { border-color: var(--border-primary); }
+        .border-secondary { border-color: var(--border-secondary); }
+
+
+        /* Button classes */
+        .btn-primary {
+            background-color: var(--button-primary);
+            color: var(--bg-primary);
+            border: 1px solid var(--button-primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--button-primary-hover);
+            border-color: var(--button-primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--button-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--button-secondary-hover);
+            border-color: var(--border-secondary);
+        }
+
+        .copy-btn {
+            background-color: var(--copy-button-bg);
+            color: var(--copy-button-text);
+            border: 1px solid var(--copy-button-bg);
+        }
+
+        .copy-btn:hover {
+            background-color: var(--copy-button-hover);
+            border-color: var(--copy-button-hover);
+        }
+
+        /* Brand logo classes */
+        .brand-logo {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-weight: 900;
+            letter-spacing: -0.025em;
+        }
+
+        .brand-logo-large {
+            font-size: 2.5rem;
+        }
+
+        .brand-logo-medium {
+            font-size: 2rem;
+        }
+
+        /* Provider card styles */
+        .provider-card {
+            transition: all 0.3s ease;
+            border: 2px solid var(--border-primary);
+        }
+
+        .provider-card:hover {
+            border-color: var(--text-primary);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        /* Custom IdP form styles */
+        .custom-idp-form {
+            background: var(--bg-secondary);
+            border-left: 4px solid var(--text-primary);
+        }
+
+        .custom-idp-form h3 {
+            color: var(--text-primary);
+        }
+
+        /* Status styles */
+        .status {
+            padding: 1rem 1.25rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .status.success {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+
+        .status.error {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+
+        .status.info {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-primary text-primary">
+    <!-- Navigation -->
+    <nav class="border-b border-primary">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <a href="/" class="flex items-center">
+                    <h1 class="text-3xl font-black tracking-tight brand-logo brand-logo-large">
+                        sso.broker
+                    </h1>
+                </a>
+                <div class="flex items-center gap-4">
+                    <a 
+                        href="https://github.com/evantobin/sso.broker" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-all hover:scale-105 btn-secondary"
+                    >
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        <span class="hidden sm:inline">Source Code</span>
+                        <span class="sm:hidden">Code</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-primary mb-4">🔐 SAML Test Service Provider</h1>
+            <p class="text-lg text-secondary">Test SAML authentication flows with sso.broker</p>
+        </div>
+
+        <!-- Provider Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <!-- Apple SAML -->
+            <div class="provider-card bg-secondary border border-primary rounded-lg p-6 text-center">
+                <div class="text-5xl mb-4">🍎</div>
+                <h3 class="text-xl font-bold text-primary mb-2">Apple</h3>
+                <p class="text-secondary mb-6 text-sm">Test SAML authentication with Apple ID</p>
+                <button 
+                    onclick="testSamlFlow('apple')" 
+                    class="btn-primary px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 w-full"
+                >
+                    Test SAML Flow
+                </button>
+            </div>
+
+            <!-- Google SAML -->
+            <div class="provider-card bg-secondary border border-primary rounded-lg p-6 text-center">
+                <div class="text-5xl mb-4">🔍</div>
+                <h3 class="text-xl font-bold text-primary mb-2">Google</h3>
+                <p class="text-secondary mb-6 text-sm">Test SAML authentication with Google</p>
+                <button 
+                    onclick="testSamlFlow('google')" 
+                    class="btn-primary px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 w-full"
+                >
+                    Test SAML Flow
+                </button>
+            </div>
+
+            <!-- GitHub SAML -->
+            <div class="provider-card bg-secondary border border-primary rounded-lg p-6 text-center">
+                <div class="text-5xl mb-4">🐙</div>
+                <h3 class="text-xl font-bold text-primary mb-2">GitHub</h3>
+                <p class="text-secondary mb-6 text-sm">Test SAML authentication with GitHub</p>
+                <button 
+                    onclick="testSamlFlow('github')" 
+                    class="btn-primary px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 w-full"
+                >
+                    Test SAML Flow
+                </button>
+            </div>
+        </div>
+
+        <!-- Custom IdP Section -->
+        <div class="custom-idp-form bg-secondary border border-primary rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold text-primary mb-4 flex items-center gap-2">
+                ⚙️ Custom SAML Identity Provider
+            </h2>
+            <p class="text-secondary mb-4">Test with your own SAML Identity Provider by providing the SSO endpoint URL.</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label for="customIdpUrl" class="block text-sm font-medium text-primary mb-2">
+                        SAML IdP SSO URL:
+                    </label>
+                    <input 
+                        type="url" 
+                        id="customIdpUrl" 
+                        placeholder="https://your-idp.com/saml/sso"
+                        class="w-full p-3 border border-primary rounded-lg bg-primary text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
+                </div>
+                <div>
+                    <label for="customIdpEntityId" class="block text-sm font-medium text-primary mb-2">
+                        Entity ID (optional):
+                    </label>
+                    <input 
+                        type="text" 
+                        id="customIdpEntityId" 
+                        placeholder="your-idp-entity-id"
+                        class="w-full p-3 border border-primary rounded-lg bg-primary text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    />
+                </div>
+                <button 
+                    onclick="testCustomSamlFlow()" 
+                    class="btn-primary px-6 py-3 rounded-lg font-medium transition-all hover:scale-105"
+                >
+                    🚀 Test Custom SAML Flow
+                </button>
+            </div>
+            <div id="customIdpStatus"></div>
+        </div>
+
+        <!-- How it Works Section -->
+        <div class="bg-secondary border border-primary rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold text-primary mb-4 flex items-center gap-2">
+                📋 How it Works
+            </h2>
+            <ol class="text-secondary space-y-3 list-decimal list-inside">
+                <li>Click a "Test SAML Flow" button above or enter a custom IdP URL</li>
+                <li>You'll be redirected to the SAML Identity Provider</li>
+                <li>Complete the authentication flow (e.g., log in with GitHub, then approve consent)</li>
+                <li>The SAML response will be posted back to this test endpoint</li>
+                <li>View the parsed SAML data and response details</li>
+            </ol>
+        </div>
+
+        <!-- Test Endpoint Info -->
+        <div class="bg-secondary border border-primary rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold text-primary mb-4 flex items-center gap-2">
+                🔗 Test Endpoint
+            </h2>
+            <p class="text-secondary mb-4">This mock Service Provider receives SAML responses at:</p>
+            <div class="bg-tertiary p-4 rounded-lg mb-4">
+                <code class="text-primary font-mono text-sm">https://test-saml.sso.broker/saml/callback</code>
+            </div>
+            <p class="text-secondary">Use this URL as your <code class="bg-tertiary px-2 py-1 rounded text-sm">AssertionConsumerServiceURL</code> in SAML requests.</p>
+        </div>
+
+        <!-- Available IdPs Section -->
+        <div class="bg-secondary border border-primary rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold text-primary mb-4 flex items-center gap-2">
+                🏢 Available SAML Identity Providers
+            </h2>
+            <p class="text-secondary mb-4">These are the endpoints for sso.broker acting as an IdP:</p>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between bg-tertiary p-3 rounded-lg">
+                    <div>
+                        <span class="font-medium text-primary">Apple SAML:</span>
+                        <code class="text-secondary ml-2">https://apple-saml.sso.broker</code>
+                    </div>
+                    <a href="https://apple-saml.sso.broker/metadata" target="_blank" class="text-sm btn-secondary px-3 py-1 rounded">Metadata</a>
+                </div>
+                <div class="flex items-center justify-between bg-tertiary p-3 rounded-lg">
+                    <div>
+                        <span class="font-medium text-primary">Google SAML:</span>
+                        <code class="text-secondary ml-2">https://google-saml.sso.broker</code>
+                    </div>
+                    <a href="https://google-saml.sso.broker/metadata" target="_blank" class="text-sm btn-secondary px-3 py-1 rounded">Metadata</a>
+                </div>
+                <div class="flex items-center justify-between bg-tertiary p-3 rounded-lg">
+                    <div>
+                        <span class="font-medium text-primary">GitHub SAML:</span>
+                        <code class="text-secondary ml-2">https://github-saml.sso.broker</code>
+                    </div>
+                    <a href="https://github-saml.sso.broker/metadata" target="_blank" class="text-sm btn-secondary px-3 py-1 rounded">Metadata</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-primary bg-secondary">
+        <div class="container mx-auto px-6 py-8">
+            <div class="text-center text-secondary">
+                <p>Powered by <a href="https://sso.broker" target="_blank" class="text-primary hover:underline">sso.broker</a> - Universal SSO Broker</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function testSamlFlow(provider) {
+            // Generate a simple SAML request for testing
+            const samlRequest = generateSamlRequest(provider);
+            const encodedRequest = btoa(samlRequest);
+            
+            // Redirect to the SAML IdP
+            const idpUrl = `https://${provider}-saml.sso.broker/saml/sso?SAMLRequest=${encodedRequest}`;
+            window.open(idpUrl, '_blank');
+        }
+        
+        function testCustomSamlFlow() {
+            const customIdpUrl = document.getElementById('customIdpUrl').value.trim();
+            const customEntityId = document.getElementById('customIdpEntityId').value.trim();
+            const statusDiv = document.getElementById('customIdpStatus');
+            
+            if (!customIdpUrl) {
+                statusDiv.innerHTML = '<div class="status error"><span>❌</span><span>Please enter a SAML IdP SSO URL.</span></div>';
+                return;
+            }
+            
+            // Validate URL format
+            try {
+                new URL(customIdpUrl);
+            } catch (e) {
+                statusDiv.innerHTML = '<div class="status error"><span>❌</span><span>Please enter a valid URL.</span></div>';
+                return;
+            }
+            
+            // Generate a simple SAML request for the custom IdP
+            const samlRequest = generateCustomSamlRequest(customIdpUrl, customEntityId);
+            const encodedRequest = btoa(samlRequest);
+            
+            // Redirect to the custom SAML IdP
+            const idpUrl = `${customIdpUrl}?SAMLRequest=${encodedRequest}`;
+            statusDiv.innerHTML = '<div class="status info"><span>ℹ️</span><span>Redirecting to custom IdP...</span></div>';
+            window.open(idpUrl, '_blank');
+        }
+        
+        function generateSamlRequest(provider) {
+            const now = new Date().toISOString();
+            const requestId = '_test_' + Math.random().toString(36).substr(2, 9);
+            
+            return `<?xml version="1.0" encoding="UTF-8"?><samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="${requestId}" Version="2.0" IssueInstant="${now}" Destination="https://${provider}-saml.sso.broker/saml/sso" AssertionConsumerServiceURL="https://test-saml.sso.broker/saml/callback" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"><saml:Issuer>https://test-saml.sso.broker</saml:Issuer><samlp:NameIDPolicy Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress" AllowCreate="true"/></samlp:AuthnRequest>`;
+        }
+        
+        function generateCustomSamlRequest(idpUrl, entityId) {
+            const now = new Date().toISOString();
+            const requestId = '_custom_test_' + Math.random().toString(36).substr(2, 9);
+            const issuer = entityId || 'https://test-saml.sso.broker';
+            
+            return `<?xml version="1.0" encoding="UTF-8"?><samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="${requestId}" Version="2.0" IssueInstant="${now}" Destination="${idpUrl}" AssertionConsumerServiceURL="https://test-saml.sso.broker/saml/callback" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"><saml:Issuer>${issuer}</saml:Issuer><samlp:NameIDPolicy Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress" AllowCreate="true"/></samlp:AuthnRequest>`;
+        }
+    </script>
+</body>
+</html>

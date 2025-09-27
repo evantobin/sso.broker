@@ -61,40 +61,68 @@ export function generateSamlMetadata(providerKey, config) {
   return metadata;
 }
 
-// Parse SAML request
+// Parse SAML request using simple string parsing
 export function parseSamlRequest(samlRequest) {
   try {
-    const decoded = atob(samlRequest);
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(decoded, 'text/xml');
+    // Clean the base64 string by removing invalid characters (like spaces)
+    const cleanRequest = samlRequest.replace(/[^A-Za-z0-9+/=]/g, '');
     
-    const authnRequest = doc.querySelector('AuthnRequest');
-    if (!authnRequest) {
-      throw new Error('Invalid SAML request');
+    // Decode the base64 SAML request
+    const decoded = atob(cleanRequest);
+    
+    // Simple XML parsing using string methods
+    const extractAttribute = (xml, attrName) => {
+      const regex = new RegExp(`${attrName}="([^"]*)"`);
+      const match = xml.match(regex);
+      return match ? match[1] : null;
+    };
+    
+    const extractElement = (xml, tagName) => {
+      const regex = new RegExp(`<${tagName}[^>]*>([^<]*)</${tagName}>`);
+      const match = xml.match(regex);
+      return match ? match[1] : null;
+    };
+    
+    // Extract AuthnRequest attributes
+    const id = extractAttribute(decoded, 'ID');
+    const issueInstant = extractAttribute(decoded, 'IssueInstant');
+    const destination = extractAttribute(decoded, 'Destination');
+    const assertionConsumerServiceURL = extractAttribute(decoded, 'AssertionConsumerServiceURL');
+    
+    // Extract Issuer element
+    const issuer = extractElement(decoded, 'saml:Issuer');
+    
+    if (!id) {
+      throw new Error('Invalid SAML request - missing ID attribute');
     }
     
     return {
-      id: authnRequest.getAttribute('ID'),
-      issueInstant: authnRequest.getAttribute('IssueInstant'),
-      destination: authnRequest.getAttribute('Destination'),
-      assertionConsumerServiceURL: authnRequest.getAttribute('AssertionConsumerServiceURL'),
-      issuer: authnRequest.querySelector('Issuer')?.textContent
+      id,
+      issueInstant,
+      destination,
+      assertionConsumerServiceURL,
+      issuer
     };
   } catch (error) {
-    throw new Error('Failed to parse SAML request');
+    throw new Error('Failed to parse SAML request: ' + error.message);
   }
 }
 
-// Generate SAML response
+// Generate SAML response (simplified)
 export function generateSamlResponse(request, userEmail, config) {
-  const now = new Date();
-  const notBefore = new Date(now.getTime() - 60000); // 1 minute before
-  const notOnOrAfter = new Date(now.getTime() + 300000); // 5 minutes after
-  
-  const response = `<?xml version="1.0" encoding="UTF-8"?>
+  try {
+    const now = new Date();
+    const notBefore = new Date(now.getTime() - 60000); // 1 minute before
+    const notOnOrAfter = new Date(now.getTime() + 300000); // 5 minutes after
+    
+    const responseId = '_' + Math.random().toString(36).substr(2, 9);
+    const assertionId = '_' + Math.random().toString(36).substr(2, 9);
+    const sessionIndex = '_' + Math.random().toString(36).substr(2, 9);
+    
+    const response = `<?xml version="1.0" encoding="UTF-8"?>
 <samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" 
                 xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
-                ID="_${Math.random().toString(36).substr(2, 9)}"
+                ID="${responseId}"
                 Version="2.0"
                 IssueInstant="${now.toISOString()}"
                 Destination="${request.assertionConsumerServiceURL}"
@@ -104,7 +132,7 @@ export function generateSamlResponse(request, userEmail, config) {
     <samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>
   </samlp:Status>
   <saml:Assertion xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion"
-                  ID="_${Math.random().toString(36).substr(2, 9)}"
+                  ID="${assertionId}"
                   Version="2.0"
                   IssueInstant="${now.toISOString()}">
     <saml:Issuer>${config.entityId}</saml:Issuer>
@@ -123,7 +151,7 @@ export function generateSamlResponse(request, userEmail, config) {
       </saml:AudienceRestriction>
     </saml:Conditions>
     <saml:AuthnStatement AuthnInstant="${now.toISOString()}"
-                         SessionIndex="_${Math.random().toString(36).substr(2, 9)}">
+                         SessionIndex="${sessionIndex}">
       <saml:AuthnContext>
         <saml:AuthnContextClassRef>urn:oasis:names:tc:SAML:2.0:ac:classes:PasswordProtectedTransport</saml:AuthnContextClassRef>
       </saml:AuthnContext>
@@ -138,8 +166,12 @@ export function generateSamlResponse(request, userEmail, config) {
     </saml:AttributeStatement>
   </saml:Assertion>
 </samlp:Response>`;
-  
-  return response;
+    
+    return response;
+  } catch (error) {
+    console.error('SAML response generation error:', error);
+    throw new Error('Failed to generate SAML response: ' + error.message);
+  }
 }
 
 // Sign SAML response (simplified - in production use proper XML signature)
@@ -153,18 +185,31 @@ export async function showSamlConsentScreen(url, spEntityId, acsUrl, relayState,
   // Import renderTemplate function
   const { renderTemplate } = await import('./utils.js');
   
+  // Construct proper consent URLs by adding parameters to existing query string
+  const baseUrl = url.origin + url.pathname;
+  const existingParams = url.searchParams;
+  
+  // Create new URLSearchParams for consent URLs
+  const allowParams = new URLSearchParams(existingParams);
+  allowParams.set('consent', 'allow');
+  allowParams.set('relayState', relayState || '');
+  
+  const denyParams = new URLSearchParams(existingParams);
+  denyParams.set('consent', 'deny');
+  denyParams.set('relayState', relayState || '');
+  
   // Prepare template data
   const templateData = {
     title: 'SAML Authentication',
     heading: 'Authorize Service Provider',
     description: 'This service provider wants to access your account information.',
     appName: spEntityId,
-    protocol: 'saml',
+    saml: true,
     providerKey: providerKey,
     spEntityId: spEntityId,
     acsUrl: acsUrl,
-    allowUrl: `${url}?consent=allow&relayState=${relayState}`,
-    denyUrl: `${url}?consent=deny&relayState=${relayState}`
+    allowUrl: `${baseUrl}?${allowParams.toString()}`,
+    denyUrl: `${baseUrl}?${denyParams.toString()}`
   };
 
   // Render the template

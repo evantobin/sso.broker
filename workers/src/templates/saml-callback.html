@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAML Response Test Endpoint - sso.broker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: 'var(--text-primary)',
+                            50: 'var(--bg-tertiary)',
+                            100: 'var(--bg-tertiary)',
+                            200: 'var(--border-secondary)',
+                            300: 'var(--border-secondary)',
+                            400: 'var(--text-tertiary)',
+                            500: 'var(--text-secondary)',
+                            600: 'var(--text-secondary)',
+                            700: 'var(--text-primary)',
+                            800: 'var(--text-primary)',
+                            900: 'var(--text-primary)',
+                        },
+                        secondary: {
+                            DEFAULT: 'var(--text-secondary)',
+                        },
+                        tertiary: {
+                            DEFAULT: 'var(--text-tertiary)',
+                        }
+                    },
+                    backgroundColor: {
+                        primary: 'var(--bg-primary)',
+                        secondary: 'var(--bg-secondary)',
+                        tertiary: 'var(--bg-tertiary)',
+                    },
+                    textColor: {
+                        primary: 'var(--text-primary)',
+                        secondary: 'var(--text-secondary)',
+                        tertiary: 'var(--text-tertiary)',
+                    },
+                    borderColor: {
+                        primary: 'var(--border-primary)',
+                        secondary: 'var(--border-secondary)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* CSS Custom Properties for theming */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --bg-tertiary: #f3f4f6;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --text-tertiary: #9ca3af;
+            --border-primary: #e5e7eb;
+            --border-secondary: #d1d5db;
+            --button-primary: #111827;
+            --button-primary-hover: #374151;
+            --button-secondary: #f3f4f6;
+            --button-secondary-hover: #e5e7eb;
+            --code-bg: #f8fafc;
+            --copy-button-bg: #111827;
+            --copy-button-hover: #374151;
+            --copy-button-text: #ffffff;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #111827;
+                --bg-secondary: #1f2937;
+                --bg-tertiary: #374151;
+                --text-primary: #f9fafb;
+                --text-secondary: #d1d5db;
+                --text-tertiary: #9ca3af;
+                --border-primary: #374151;
+                --border-secondary: #4b5563;
+                --button-primary: #f9fafb;
+                --button-primary-hover: #e5e7eb;
+                --button-secondary: #374151;
+                --button-secondary-hover: #4b5563;
+                --code-bg: #1f2937;
+                --copy-button-bg: #f9fafb;
+                --copy-button-hover: #e5e7eb;
+                --copy-button-text: #111827;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-tertiary);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Code block styling */
+        pre {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            line-height: 1.5;
+            overflow-x: auto;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        /* Ensure code blocks don't overflow */
+        pre code {
+            white-space: pre-wrap;
+            word-break: break-all;
+            overflow-wrap: anywhere;
+        }
+
+        /* Force break long URLs and code strings */
+        pre, code {
+            word-break: break-all;
+            overflow-wrap: anywhere;
+            hyphens: none;
+        }
+
+        /* Button hover effects */
+        button {
+            transition: all 0.15s ease-in-out;
+        }
+
+        /* Global link styles */
+        a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: opacity 0.15s ease-in-out;
+        }
+
+        a:hover {
+            opacity: 0.8;
+        }
+
+        a:visited {
+            color: var(--text-secondary);
+        }
+
+        /* Utility classes */
+        .text-primary { color: var(--text-primary); }
+        .text-secondary { color: var(--text-secondary); }
+        .text-tertiary { color: var(--text-tertiary); }
+        .bg-primary { background-color: var(--bg-primary); }
+        .bg-secondary { background-color: var(--bg-secondary); }
+        .bg-tertiary { background-color: var(--bg-tertiary); }
+        .border-primary { border-color: var(--border-primary); }
+        .border-secondary { border-color: var(--border-secondary); }
+
+
+        /* Button classes */
+        .btn-primary {
+            background-color: var(--button-primary);
+            color: var(--bg-primary);
+            border: 1px solid var(--button-primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--button-primary-hover);
+            border-color: var(--button-primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--button-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--button-secondary-hover);
+            border-color: var(--border-secondary);
+        }
+
+        .copy-btn {
+            background-color: var(--copy-button-bg);
+            color: var(--copy-button-text);
+            border: 1px solid var(--copy-button-bg);
+        }
+
+        .copy-btn:hover {
+            background-color: var(--copy-button-hover);
+            border-color: var(--copy-button-hover);
+        }
+
+        /* Brand logo classes */
+        .brand-logo {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-weight: 900;
+            letter-spacing: -0.025em;
+        }
+
+        .brand-logo-large {
+            font-size: 2.5rem;
+        }
+
+        .brand-logo-medium {
+            font-size: 2rem;
+        }
+
+        /* Status styles */
+        .status {
+            padding: 1rem 1.25rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .status.success {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+
+        .status.error {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+
+        .status.info {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+
+        /* Data grid */
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.25rem;
+            margin: 1.25rem 0;
+        }
+
+        .data-card {
+            background: var(--bg-primary);
+            padding: 1.25rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .data-card h4 {
+            color: var(--text-primary);
+            margin-bottom: 0.625rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        .data-card p {
+            color: var(--text-secondary);
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            background: var(--bg-tertiary);
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.25rem;
+            word-break: break-all;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-primary text-primary">
+    <!-- Navigation -->
+    <nav class="border-b border-primary">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <a href="/" class="flex items-center">
+                    <h1 class="text-3xl font-black tracking-tight brand-logo brand-logo-large">
+                        sso.broker
+                    </h1>
+                </a>
+                <div class="flex items-center gap-4">
+                    <a 
+                        href="https://github.com/evantobin/sso.broker" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-all hover:scale-105 btn-secondary"
+                    >
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        <span class="hidden sm:inline">Source Code</span>
+                        <span class="sm:hidden">Code</span>
+                    </a>
+                    <a 
+                        href="/" 
+                        class="px-4 py-2 rounded transition-colors btn-secondary"
+                    >
+                        ← Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-primary mb-4">🔐 SAML Response Test Endpoint</h1>
+            <p class="text-lg text-secondary">Mock Service Provider for testing SAML authentication flows</p>
+        </div>
+
+        {{^hasData}}
+        <!-- How This Works Section -->
+        <div class="bg-secondary border border-primary rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold text-primary mb-4 flex items-center gap-2">
+                📋 How This Works
+            </h2>
+            <p class="text-secondary mb-4">This is a mock SAML Service Provider that can receive and display SAML responses from sso.broker.</p>
+            <ol class="text-secondary space-y-2 list-decimal list-inside">
+                <li>Use this URL as your <code class="bg-tertiary px-2 py-1 rounded text-sm">AssertionConsumerServiceURL</code> in SAML requests</li>
+                <li>After completing the SAML flow, the response will be posted here</li>
+                <li>You can also manually test by pasting a SAML response below</li>
+            </ol>
+        </div>
+
+        <!-- Manual Test Section -->
+        <div class="bg-secondary border border-primary rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold text-primary mb-4 flex items-center gap-2">
+                🧪 Manual Test
+            </h2>
+            <p class="text-secondary mb-4">Paste a base64-encoded SAML response to decode and view:</p>
+            <div class="mb-4">
+                <label for="samlResponse" class="block text-sm font-medium text-primary mb-2">
+                    SAML Response (base64):
+                </label>
+                <textarea 
+                    id="samlResponse" 
+                    placeholder="Paste your base64-encoded SAML response here..."
+                    class="w-full p-4 border border-primary rounded-lg font-mono text-sm bg-primary text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                    rows="4"
+                ></textarea>
+            </div>
+            <button 
+                onclick="decodeSamlResponse()" 
+                class="btn-primary px-6 py-3 rounded-lg font-medium transition-all hover:scale-105"
+            >
+                🔍 Decode SAML Response
+            </button>
+            <div id="decodeStatus"></div>
+        </div>
+        {{/hasData}}
+
+        <!-- Received SAML Response Section -->
+        <div class="bg-secondary border border-primary rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold text-primary mb-4 flex items-center gap-2">
+                📥 Received SAML Response
+            </h2>
+            <div id="receivedData">
+                {{#hasData}}
+                <div class="status success">
+                    <span>✅</span>
+                    <span>{{message}}</span>
+                </div>
+                
+                <div class="data-grid">
+                    <div class="data-item">
+                        <label>Response ID:</label>
+                        <code>{{data.responseId}}</code>
+                    </div>
+                    <div class="data-item">
+                        <label>In Response To:</label>
+                        <code>{{data.inResponseTo}}</code>
+                    </div>
+                    <div class="data-item">
+                        <label>Issuer:</label>
+                        <code>{{data.issuer}}</code>
+                    </div>
+                    <div class="data-item">
+                        <label>Subject (NameID):</label>
+                        <code>{{data.subject}}</code>
+                    </div>
+                    <div class="data-item">
+                        <label>Relay State:</label>
+                        <code>{{data.relayState}}</code>
+                    </div>
+                    <div class="data-item">
+                        <label>Timestamp:</label>
+                        <code>{{data.timestamp}}</code>
+                    </div>
+                </div>
+
+                <div class="mt-6">
+                    <h3 class="text-lg font-semibold text-primary mb-3">Raw XML Response:</h3>
+                    <div class="relative">
+                        <pre class="bg-tertiary border border-primary rounded-lg p-4 text-sm font-mono text-primary overflow-x-auto"><code>{{rawXml}}</code></pre>
+                        <button 
+                            onclick="copyToClipboard('{{rawXml}}')" 
+                            class="copy-btn"
+                            title="Copy to clipboard"
+                        >
+                            📋
+                        </button>
+                    </div>
+                </div>
+                {{/hasData}}
+                {{^hasData}}
+                <div class="status info">
+                    <span>ℹ️</span>
+                    <span>{{message}}</span>
+                </div>
+                {{/hasData}}
+            </div>
+        </div>
+
+        <!-- URL Parameters Section -->
+        <div class="bg-secondary border border-primary rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold text-primary mb-4 flex items-center gap-2">
+                🔍 URL Parameters
+            </h2>
+            <div id="urlParams">
+                <div class="status info">
+                    <span>ℹ️</span>
+                    <span>No URL parameters detected.</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-primary bg-secondary">
+        <div class="container mx-auto px-6 py-8">
+            <div class="text-center text-secondary">
+                <p>Powered by <a href="https://sso.broker" target="_blank" class="text-primary hover:underline">sso.broker</a> - Universal SSO Broker</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Function to decode base64
+        function base64Decode(str) {
+            try {
+                return atob(str);
+            } catch (e) {
+                throw new Error('Invalid base64 string: ' + e.message);
+            }
+        }
+
+        // Function to parse XML (simple parser)
+        function parseXml(xmlString) {
+            try {
+                const parser = new DOMParser();
+                return parser.parseFromString(xmlString, 'text/xml');
+            } catch (e) {
+                throw new Error('Invalid XML: ' + e.message);
+            }
+        }
+
+        // Function to extract SAML response data
+        function extractSamlData(xmlDoc) {
+            const response = xmlDoc.querySelector('samlp\\:Response, Response');
+            if (!response) {
+                throw new Error('No SAML Response element found');
+            }
+
+            const assertion = xmlDoc.querySelector('saml\\:Assertion, Assertion');
+            if (!assertion) {
+                throw new Error('No SAML Assertion element found');
+            }
+
+            const subject = assertion.querySelector('saml\\:Subject, Subject');
+            const nameId = subject ? subject.querySelector('saml\\:NameID, NameID') : null;
+            const attributeStatement = assertion.querySelector('saml\\:AttributeStatement, AttributeStatement');
+            const attributes = attributeStatement ? attributeStatement.querySelectorAll('saml\\:Attribute, Attribute') : [];
+
+            const extractedData = {
+                responseId: response.getAttribute('ID'),
+                inResponseTo: response.getAttribute('InResponseTo'),
+                issueInstant: response.getAttribute('IssueInstant'),
+                issuer: response.querySelector('saml\\:Issuer, Issuer')?.textContent,
+                status: response.querySelector('samlp\\:StatusCode, StatusCode')?.getAttribute('Value'),
+                subject: nameId ? nameId.textContent : null,
+                attributes: {}
+            };
+
+            // Extract attributes
+            attributes.forEach(attr => {
+                const name = attr.getAttribute('Name');
+                const values = attr.querySelectorAll('saml\\:AttributeValue, AttributeValue');
+                if (name && values.length > 0) {
+                    extractedData.attributes[name] = Array.from(values).map(v => v.textContent);
+                }
+            });
+
+            return extractedData;
+        }
+
+        // Function to decode SAML response manually
+        function decodeSamlResponse() {
+            const samlResponse = document.getElementById('samlResponse').value.trim();
+            const statusDiv = document.getElementById('decodeStatus');
+            
+            if (!samlResponse) {
+                statusDiv.innerHTML = '<div class="status error"><span>❌</span><span>Please enter a SAML response to decode.</span></div>';
+                return;
+            }
+
+            try {
+                const decodedXml = base64Decode(samlResponse);
+                const xmlDoc = parseXml(decodedXml);
+                const samlData = extractSamlData(xmlDoc);
+                
+                statusDiv.innerHTML = '<div class="status success"><span>✅</span><span>SAML Response decoded successfully!</span></div>';
+                displaySamlData(samlData, decodedXml);
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status error"><span>❌</span><span>Error: ${error.message}</span></div>`;
+            }
+        }
+
+        // Function to display SAML data
+        function displaySamlData(samlData, rawXml) {
+            const receivedDataDiv = document.getElementById('receivedData');
+            
+            const attributesHtml = Object.keys(samlData.attributes).length > 0 
+                ? `<div class="data-card">
+                    <h4>📋 Attributes</h4>
+                    ${Object.entries(samlData.attributes).map(([key, values]) => 
+                        `<p><strong>${key}:</strong> ${Array.isArray(values) ? values.join(', ') : values}</p>`
+                    ).join('')}
+                  </div>`
+                : '';
+            
+            receivedDataDiv.innerHTML = `
+                <div class="status success">
+                    <span>✅</span>
+                    <span>SAML Response received and parsed successfully!</span>
+                </div>
+                <div class="data-grid">
+                    <div class="data-card">
+                        <h4>🆔 Response ID</h4>
+                        <p>${samlData.responseId || 'N/A'}</p>
+                    </div>
+                    <div class="data-card">
+                        <h4>👤 Subject (User)</h4>
+                        <p>${samlData.subject || 'N/A'}</p>
+                    </div>
+                    <div class="data-card">
+                        <h4>🏢 Issuer</h4>
+                        <p>${samlData.issuer || 'N/A'}</p>
+                    </div>
+                    <div class="data-card">
+                        <h4>🔄 In Response To</h4>
+                        <p>${samlData.inResponseTo || 'N/A'}</p>
+                    </div>
+                    <div class="data-card">
+                        <h4>⏰ Issue Instant</h4>
+                        <p>${samlData.issueInstant || 'N/A'}</p>
+                    </div>
+                    <div class="data-card">
+                        <h4>📊 Status</h4>
+                        <p>${samlData.status || 'N/A'}</p>
+                    </div>
+                    ${attributesHtml}
+                </div>
+                <h3 class="text-lg font-semibold text-primary mb-4 mt-8">📄 Raw XML Response</h3>
+                <pre class="bg-tertiary p-4 rounded-lg text-sm overflow-x-auto"><code>${rawXml}</code></pre>
+            `;
+        }
+
+        // Function to display URL parameters
+        function displayUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const paramsDiv = document.getElementById('urlParams');
+            
+            if (urlParams.toString()) {
+                const params = {};
+                for (const [key, value] of urlParams) {
+                    params[key] = value;
+                }
+                paramsDiv.innerHTML = `
+                    <h3 class="text-lg font-semibold text-primary mb-4">🔗 URL Parameters:</h3>
+                    <pre class="bg-tertiary p-4 rounded-lg text-sm overflow-x-auto"><code>${JSON.stringify(params, null, 2)}</code></pre>
+                `;
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            displayUrlParams();
+        });
+    </script>
+</body>
+</html>
