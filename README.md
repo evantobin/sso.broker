@@ -229,14 +229,25 @@ The frontend includes:
    - Google Client ID  
    - GitHub Client ID
 
-2. **Set Secrets** (via Wrangler):
+2. **Set OAuth Provider Secrets** (via Wrangler):
 ```bash
 cd workers
 wrangler secret put APPLE_CLIENT_SECRET
 wrangler secret put GOOGLE_CLIENT_SECRET
 wrangler secret put GITHUB_CLIENT_SECRET
-wrangler secret put MASTER_SECRET
 ```
+
+3. **Generate and Upload Certificates** (automated):
+```bash
+./updatecerts.sh
+```
+
+This script automatically generates:
+- **Master Secret**: 32-byte cryptographically secure secret for client credential signing
+- **SAML Certificate**: 10-year X.509 certificate for SAML assertions (Kissimmee, FL)
+- **SAML Private Key**: 2048-bit RSA private key for signing SAML assertions
+
+All secrets are automatically uploaded to Cloudflare Workers with proper formatting for SAML metadata.
 
 ## Deployment
 
@@ -250,6 +261,32 @@ This script:
 - Deploys the worker to Cloudflare Workers
 - Creates subdomain routes (`apple.sso.broker`, `google.sso.broker`, `github.sso.broker`)
 - Sets up DNS records with Cloudflare proxying
+
+**After deployment, run:**
+```bash
+./updatecerts.sh
+```
+
+This generates and uploads all required certificates and secrets to Cloudflare Workers.
+
+### Certificate Management
+
+The `updatecerts.sh` script handles all certificate and secret generation:
+
+**Features:**
+- **Automated Generation**: Creates fresh certificates and secrets with one command
+- **Proper Formatting**: SAML certificates are formatted correctly for metadata (base64 without PEM markers)
+- **Long Validity**: 10-year certificates reduce maintenance overhead
+- **Secure Generation**: Uses OpenSSL for cryptographically secure random generation
+- **No Local Storage**: Certificates are uploaded directly to Cloudflare, no local files created
+
+**Generated Secrets:**
+- `MASTER_SECRET`: For signing client credentials
+- `SAML_CERT`: X.509 certificate for SAML assertions (Kissimmee, FL)
+- `SAML_PRIVATE_KEY`: RSA private key for signing SAML assertions
+
+**Regeneration:**
+Run the script anytime to generate fresh certificates - there's no downside to frequent regeneration.
 
 ### Manual Deployment
 
