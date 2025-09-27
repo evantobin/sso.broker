@@ -174,10 +174,121 @@ export function generateSamlResponse(request, userEmail, config) {
   }
 }
 
-// Sign SAML response (simplified - in production use proper XML signature)
-export function signSamlResponse(samlResponse, privateKey) {
-  // In production, implement proper XML signature with the private key
-  return samlResponse;
+// Sign SAML response with XML signature using Web Crypto
+export async function signSamlResponse(samlResponse, privateKeyPem, certificate) {
+  try {
+    // Extract the Response ID from the SAML response
+    const responseIdMatch = samlResponse.match(/ID="([^"]+)"/);
+    const responseId = responseIdMatch ? responseIdMatch[1] : generateResponseId();
+    
+    // Import the private key
+    const privateKey = await importPrivateKey(privateKeyPem);
+    
+    // Create a simplified canonical form of the response for signing
+    // In a full implementation, you'd use proper XML canonicalization
+    const canonicalXml = createCanonicalForm(samlResponse);
+    
+    // Calculate SHA-256 digest
+    const digestBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(canonicalXml));
+    const digestValue = btoa(String.fromCharCode(...new Uint8Array(digestBuffer)));
+    
+    // Create the SignedInfo element
+    const signedInfo = `<ds:SignedInfo xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+      <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+      <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha256"/>
+      <ds:Reference URI="#${responseId}">
+        <ds:Transforms>
+          <ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+        </ds:Transforms>
+        <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+        <ds:DigestValue>${digestValue}</ds:DigestValue>
+      </ds:Reference>
+    </ds:SignedInfo>`;
+    
+    // Sign the SignedInfo
+    const signedInfoBuffer = new TextEncoder().encode(signedInfo);
+    const signatureBuffer = await crypto.subtle.sign(
+      {
+        name: 'RSASSA-PKCS1-v1_5',
+        hash: 'SHA-256'
+      },
+      privateKey,
+      signedInfoBuffer
+    );
+    const signatureValue = btoa(String.fromCharCode(...new Uint8Array(signatureBuffer)));
+    
+    // Create the complete signature element
+    const signatureElement = `
+    <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#">
+      ${signedInfo}
+      <ds:SignatureValue>${signatureValue}</ds:SignatureValue>
+      <ds:KeyInfo>
+        <ds:X509Data>
+          <ds:X509Certificate>${certificate || 'CERTIFICATE_PLACEHOLDER'}</ds:X509Certificate>
+        </ds:X509Data>
+      </ds:KeyInfo>
+    </ds:Signature>`;
+    
+    // Insert signature after the Response opening tag
+    const finalResponse = samlResponse.replace(
+      '<samlp:Response',
+      `<samlp:Response xmlns:ds="http://www.w3.org/2000/09/xmldsig#"${signatureElement}`
+    );
+    
+    console.log('SAML response signed with Web Crypto');
+    return finalResponse;
+  } catch (error) {
+    console.error('SAML signing error:', error);
+    // Return unsigned response if signing fails
+    return samlResponse;
+  }
+}
+
+// Import private key from PEM format
+async function importPrivateKey(privateKeyPem) {
+  try {
+    // Remove PEM headers and decode base64
+    const pemHeader = '-----BEGIN PRIVATE KEY-----';
+    const pemFooter = '-----END PRIVATE KEY-----';
+    const pemContents = privateKeyPem
+      .replace(pemHeader, '')
+      .replace(pemFooter, '')
+      .replace(/\s/g, '');
+    
+    const keyData = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
+    
+    // Import the private key
+    const privateKey = await crypto.subtle.importKey(
+      'pkcs8',
+      keyData,
+      {
+        name: 'RSASSA-PKCS1-v1_5',
+        hash: 'SHA-256'
+      },
+      false,
+      ['sign']
+    );
+    
+    return privateKey;
+  } catch (error) {
+    console.error('Private key import error:', error);
+    throw new Error('Failed to import private key: ' + error.message);
+  }
+}
+
+// Create a simplified canonical form of XML for signing
+function createCanonicalForm(xml) {
+  // This is a simplified canonicalization
+  // In production, you'd use proper XML canonicalization (C14N)
+  return xml
+    .replace(/\s+/g, ' ')  // Normalize whitespace
+    .replace(/>\s+</g, '><')  // Remove whitespace between tags
+    .trim();
+}
+
+// Generate a unique response ID
+function generateResponseId() {
+  return 'id_' + Math.random().toString(36).substr(2, 9) + '_' + Date.now();
 }
 
 // Show SAML consent screen

@@ -192,7 +192,7 @@ export async function handleSamlRequest(request, env, url, pathname, host) {
       };
       
       const samlResponse = await generateSamlResponse(requestData, userEmail, config);
-      const signedResponse = await signSamlResponse(samlResponse, config.privateKey);
+      const signedResponse = await signSamlResponse(samlResponse, config.privateKey, config.certificate);
       
       // Return SAML response as HTML form for POST binding
       const htmlResponse = `

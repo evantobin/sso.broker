@@ -507,7 +507,7 @@
         }
 
         // Function to decode SAML response manually
-        function decodeSamlResponse() {
+        async function decodeSamlResponse() {
             const samlResponse = document.getElementById('samlResponse').value.trim();
             const statusDiv = document.getElementById('decodeStatus');
             
@@ -522,15 +522,100 @@
                 const samlData = extractSamlData(xmlDoc);
                 
                 statusDiv.innerHTML = '<div class="status success"><span>✅</span><span>SAML Response decoded successfully!</span></div>';
-                displaySamlData(samlData, decodedXml);
+                await displaySamlData(samlData, decodedXml);
             } catch (error) {
                 statusDiv.innerHTML = `<div class="status error"><span>❌</span><span>Error: ${error.message}</span></div>`;
             }
         }
 
-        // Function to display SAML data
-        function displaySamlData(samlData, rawXml) {
+        // Function to verify SAML signature
+        async function verifySamlSignature(xmlDoc, certificatePem) {
+            try {
+                // Find the signature element
+                const signatureElement = xmlDoc.querySelector('ds\\:Signature, Signature');
+                if (!signatureElement) {
+                    return { valid: false, error: 'No signature found in SAML response' };
+                }
+
+                // Extract signature components
+                const signatureValue = signatureElement.querySelector('ds\\:SignatureValue, SignatureValue')?.textContent;
+                const signedInfo = signatureElement.querySelector('ds\\:SignedInfo, SignedInfo');
+                const x509Certificate = signatureElement.querySelector('ds\\:X509Certificate, X509Certificate')?.textContent;
+
+                if (!signatureValue || !signedInfo || !x509Certificate) {
+                    return { valid: false, error: 'Incomplete signature elements' };
+                }
+
+                // Import the certificate
+                const certificate = await importCertificate(x509Certificate);
+                
+                // Get the canonical form of SignedInfo
+                const signedInfoXml = new XMLSerializer().serializeToString(signedInfo);
+                const canonicalSignedInfo = canonicalizeXml(signedInfoXml);
+                
+                // Verify the signature
+                const signatureBuffer = Uint8Array.from(atob(signatureValue), c => c.charCodeAt(0));
+                const dataBuffer = new TextEncoder().encode(canonicalSignedInfo);
+                
+                const isValid = await crypto.subtle.verify(
+                    {
+                        name: 'RSASSA-PKCS1-v1_5',
+                        hash: 'SHA-256'
+                    },
+                    certificate,
+                    signatureBuffer,
+                    dataBuffer
+                );
+
+                return { 
+                    valid: isValid, 
+                    error: isValid ? null : 'Signature verification failed',
+                    certificate: x509Certificate,
+                    signatureValue: signatureValue
+                };
+            } catch (error) {
+                return { valid: false, error: 'Signature verification error: ' + error.message };
+            }
+        }
+
+        // Import certificate from base64
+        async function importCertificate(certBase64) {
+            const certBuffer = Uint8Array.from(atob(certBase64), c => c.charCodeAt(0));
+            return await crypto.subtle.importKey(
+                'spki',
+                certBuffer,
+                {
+                    name: 'RSASSA-PKCS1-v1_5',
+                    hash: 'SHA-256'
+                },
+                false,
+                ['verify']
+            );
+        }
+
+        // Simple XML canonicalization
+        function canonicalizeXml(xml) {
+            // This is a simplified canonicalization
+            // In production, you'd use proper XML canonicalization
+            return xml
+                .replace(/\s+/g, ' ')
+                .replace(/>\s+</g, '><')
+                .trim();
+        }
+
+        // Function to display SAML data with signature verification
+        async function displaySamlData(samlData, rawXml) {
             const receivedDataDiv = document.getElementById('receivedData');
+            
+            // Verify signature if present
+            let signatureStatus = null;
+            try {
+                const xmlDoc = parseXml(rawXml);
+                const signatureResult = await verifySamlSignature(xmlDoc);
+                signatureStatus = signatureResult;
+            } catch (error) {
+                signatureStatus = { valid: false, error: 'Could not verify signature: ' + error.message };
+            }
             
             const attributesHtml = Object.keys(samlData.attributes).length > 0 
                 ? `<div class="data-card">
@@ -540,6 +625,25 @@
                     ).join('')}
                   </div>`
                 : '';
+
+            const signatureHtml = signatureStatus ? `
+                <div class="data-card">
+                    <h4>🔐 Digital Signature</h4>
+                    <div class="flex items-center gap-2 mb-2">
+                        ${signatureStatus.valid 
+                            ? '<span class="text-green-600">✅ Valid</span>' 
+                            : '<span class="text-red-600">❌ Invalid</span>'
+                        }
+                    </div>
+                    ${signatureStatus.error ? `<p class="text-sm text-red-600">${signatureStatus.error}</p>` : ''}
+                    ${signatureStatus.certificate ? `
+                        <details class="mt-2">
+                            <summary class="cursor-pointer text-sm text-primary">View Certificate</summary>
+                            <pre class="text-xs mt-2 bg-tertiary p-2 rounded overflow-x-auto">${signatureStatus.certificate}</pre>
+                        </details>
+                    ` : ''}
+                </div>
+            ` : '';
             
             receivedDataDiv.innerHTML = `
                 <div class="status success">
@@ -571,6 +675,7 @@
                         <h4>📊 Status</h4>
                         <p>${samlData.status || 'N/A'}</p>
                     </div>
+                    ${signatureHtml}
                     ${attributesHtml}
                 </div>
                 <h3 class="text-lg font-semibold text-primary mb-4 mt-8">📄 Raw XML Response</h3>
