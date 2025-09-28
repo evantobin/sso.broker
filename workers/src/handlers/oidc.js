@@ -96,9 +96,26 @@ export async function handleOidcRequest(request, env, url, pathname, host) {
       return errorResponse('OIDC provider not found for this subdomain', 404);
     }
     
-    const code = url.searchParams.get('code');
-    const state = url.searchParams.get('state');
-    const error = url.searchParams.get('error');
+    let code, state, error;
+    
+    // Handle different response modes
+    if (request.method === 'POST') {
+      // Apple uses form_post response mode - data is in POST body
+      try {
+        const formData = await request.formData();
+        code = formData.get('code');
+        state = formData.get('state');
+        error = formData.get('error');
+      } catch (e) {
+        logError(new Error('Failed to parse form data from POST request'), { provider: providerKey, error: e.message }, env);
+        return errorResponse('Failed to parse callback data', 400);
+      }
+    } else {
+      // Other providers use query parameters
+      code = url.searchParams.get('code');
+      state = url.searchParams.get('state');
+      error = url.searchParams.get('error');
+    }
     
     // Handle OAuth provider errors
     if (error) {
@@ -156,9 +173,10 @@ export async function handleOidcRequest(request, env, url, pathname, host) {
     }
     
     try {
-      // Validate client ID (without secret) and redirect URI
+      // Validate client ID format and redirect URI (without validating client secret)
       const masterSecret = env.MASTER_SECRET || 'default-master-secret-change-in-production';
-      const clientValidation = await validateClientCredentials(clientId, 'dummy', masterSecret);
+      const { validateClientId } = await import('../crypto.js');
+      const clientValidation = await validateClientId(clientId, masterSecret);
       
       if (!clientValidation.valid) {
         return errorResponse(`Invalid client ID: ${clientValidation.error}`, 401);
@@ -169,19 +187,24 @@ export async function handleOidcRequest(request, env, url, pathname, host) {
         return errorResponse('Invalid redirect_uri', 400);
       }
       
-      // Initial authorization request - redirect to OAuth provider
-      const authUrl = new URL(config.authorization_endpoint);
-      authUrl.searchParams.set('response_type', 'code');
-      authUrl.searchParams.set('client_id', config.clientId);
-      authUrl.searchParams.set('redirect_uri', url.origin + '/callback');
-      authUrl.searchParams.set('state', JSON.stringify({
+      // Parse the original state if it's a JSON string, otherwise use it as-is
+      let originalState;
+      try {
+        originalState = state ? JSON.parse(state) : null;
+      } catch (e) {
+        originalState = state; // Use as string if not valid JSON
+      }
+      
+      // Use provider-specific OAuth URL generation to ensure correct parameters
+      const oauthState = JSON.stringify({
         client_id: clientId,
         original_redirect_uri: redirectUri,
-        original_state: state
-      }));
-      authUrl.searchParams.set('scope', config.scope);
+        original_state: originalState
+      });
       
-      return Response.redirect(authUrl.toString(), 302);
+      const authUrl = getOAuthUrl(providerKey, config, url.origin + '/callback', oauthState);
+      
+      return Response.redirect(authUrl, 302);
     } catch (error) {
       logError(error, { action: 'authorization', provider: providerKey }, env);
       return errorResponse('Authorization failed', 500);
@@ -206,7 +229,14 @@ export async function handleOidcRequest(request, env, url, pathname, host) {
       let originalParams;
       try {
         originalParams = JSON.parse(state);
+        logRequest(request, { 
+          action: 'consent_state_parsed', 
+          provider: providerKey, 
+          originalParams: originalParams,
+          rawState: state
+        }, env);
       } catch (e) {
+        logError(new Error('Failed to parse state parameter'), { provider: providerKey, state: state, error: e.message }, env);
         return errorResponse('Invalid state parameter', 400);
       }
       
@@ -216,7 +246,9 @@ export async function handleOidcRequest(request, env, url, pathname, host) {
         errorUrl.searchParams.set('error', 'access_denied');
         errorUrl.searchParams.set('error_description', 'User denied the request');
         if (originalParams.original_state) {
-          errorUrl.searchParams.set('state', originalParams.original_state);
+          errorUrl.searchParams.set('state', typeof originalParams.original_state === 'string' 
+            ? originalParams.original_state 
+            : JSON.stringify(originalParams.original_state));
         }
         return Response.redirect(errorUrl.toString(), 302);
       }
@@ -226,6 +258,7 @@ export async function handleOidcRequest(request, env, url, pathname, host) {
         const userEmail = await getUserEmailFromOAuthProvider(providerKey, originalParams.oauth_code, config);
         
         if (!userEmail) {
+          logError(new Error('Failed to get user email from provider'), { provider: providerKey, oauthCode: originalParams.oauth_code }, env);
           return errorResponse('Failed to get user email from provider', 400);
         }
         
@@ -245,8 +278,19 @@ export async function handleOidcRequest(request, env, url, pathname, host) {
         const successUrl = new URL(originalParams.original_redirect_uri);
         successUrl.searchParams.set('code', encodedCode);
         if (originalParams.original_state) {
-          successUrl.searchParams.set('state', originalParams.original_state);
+          successUrl.searchParams.set('state', typeof originalParams.original_state === 'string' 
+            ? originalParams.original_state 
+            : JSON.stringify(originalParams.original_state));
         }
+        
+        logRequest(request, { 
+          action: 'consent_allow', 
+          provider: providerKey, 
+          userEmail: userEmail,
+          redirectUri: successUrl.toString(),
+          originalRedirectUri: originalParams.original_redirect_uri
+        }, env);
+        
         return Response.redirect(successUrl.toString(), 302);
       }
       
@@ -303,7 +347,7 @@ export async function handleOidcRequest(request, env, url, pathname, host) {
       const idToken = generateIdToken(codeData.userEmail, clientId, url.origin, env);
       
       return jsonResponse({
-        access_token: 'dummy_access_token',
+        access_token: 'dummy_access_token_use_id_token',
         token_type: 'Bearer',
         expires_in: 3600,
         id_token: idToken

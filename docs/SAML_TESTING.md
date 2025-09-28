@@ -46,7 +46,7 @@ https://test-saml.sso.broker/saml/callback
 ### Manual SAML Request
 ```bash
 # Generate a test SAML request
-SAML_REQUEST=$(echo '<?xml version="1.0" encoding="UTF-8"?><samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="_test123" Version="2.0" IssueInstant="2024-01-15T10:30:00Z" Destination="https://github-saml.sso.broker/saml/sso" AssertionConsumerServiceURL="https://test-saml.sso.broker/saml/callback" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"><saml:Issuer>https://test-saml.sso.broker</saml:Issuer><samlp:NameIDPolicy Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress" AllowCreate="true"/></samlp:AuthnRequest>' | base64 | tr -d '\n')
+SAML_REQUEST=$(echo '<?xml version="1.0" encoding="UTF-8"?><samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="_test123" Version="2.0" IssueInstant="2024-01-15T10:30:00Z" Destination="https://github-saml.sso.broker/saml/sso" AssertionConsumerServiceURL="https://test-saml.sso.broker/saml/callback" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"><saml:Issuer>urn:test-saml.sso.broker</saml:Issuer><samlp:NameIDPolicy Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress" AllowCreate="true"/></samlp:AuthnRequest>' | base64 | tr -d '\n')
 
 # Open in browser
 open "https://github-saml.sso.broker/saml/sso?SAMLRequest=$SAML_REQUEST"

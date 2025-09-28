@@ -368,6 +368,50 @@ export default function Home() {
           )}
         </div>
       </section>
+
+      {/* Test Pages Section */}
+      <section className="py-16 bg-secondary">
+        <div className="container mx-auto px-6">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl font-bold mb-8 text-primary">Try It Out</h2>
+            <p className="text-lg mb-8 text-secondary">
+              Test the OAuth and SAML flows with our interactive demo pages
+            </p>
+            <div className="grid md:grid-cols-2 gap-6">
+              <a
+                href="https://test-oauth.sso.broker"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-6 rounded-lg border-2 border-solid transition-all hover:scale-105 bg-primary border-primary text-center"
+              >
+                <div className="text-4xl mb-4">🔐</div>
+                <h3 className="text-xl font-semibold mb-2 text-primary">OAuth Test Page</h3>
+                <p className="text-sm text-secondary mb-4">
+                  Test OAuth flows with Apple, Google, and GitHub providers
+                </p>
+                <div className="text-xs text-tertiary">
+                  <code>test-oauth.sso.broker</code>
+                </div>
+              </a>
+              <a
+                href="https://test-saml.sso.broker"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="p-6 rounded-lg border-2 border-solid transition-all hover:scale-105 bg-primary border-primary text-center"
+              >
+                <div className="text-4xl mb-4">🏢</div>
+                <h3 className="text-xl font-semibold mb-2 text-primary">SAML Test Page</h3>
+                <p className="text-sm text-secondary mb-4">
+                  Test SAML flows with Apple, Google, and GitHub providers
+                </p>
+                <div className="text-xs text-tertiary">
+                  <code>test-saml.sso.broker</code>
+                </div>
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

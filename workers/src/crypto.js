@@ -302,3 +302,86 @@ export async function validateClientCredentials(clientId, clientSecret, secret) 
     return { valid: false, error: 'Invalid client credentials format' };
   }
 }
+
+// Create JWT for Apple OAuth client secret
+export async function createJWT(payload, privateKeyPem, algorithm = 'ES256', keyId = null) {
+  try {
+    // Create header
+    const header = {
+      alg: algorithm,
+      kid: keyId || 'YOUR_KEY_ID' // Key ID from Apple Developer Console
+    };
+    
+    // Encode header and payload
+    const encodedHeader = btoa(JSON.stringify(header)).replace(/[+/=]/g, (match) => {
+      switch (match) {
+        case '+': return '-';
+        case '/': return '_';
+        case '=': return '';
+        default: return match;
+      }
+    });
+    
+    const encodedPayload = btoa(JSON.stringify(payload)).replace(/[+/=]/g, (match) => {
+      switch (match) {
+        case '+': return '-';
+        case '/': return '_';
+        case '=': return '';
+        default: return match;
+      }
+    });
+    
+    const message = `${encodedHeader}.${encodedPayload}`;
+    
+    // Parse PEM format and convert to ArrayBuffer
+    const pemHeader = '-----BEGIN PRIVATE KEY-----';
+    const pemFooter = '-----END PRIVATE KEY-----';
+    const pemContents = privateKeyPem
+      .replace(pemHeader, '')
+      .replace(pemFooter, '')
+      .replace(/\s/g, '');
+    
+    const binaryDer = atob(pemContents);
+    const keyData = new Uint8Array(binaryDer.length);
+    for (let i = 0; i < binaryDer.length; i++) {
+      keyData[i] = binaryDer.charCodeAt(i);
+    }
+    
+    // Import the private key
+    const cryptoKey = await crypto.subtle.importKey(
+      'pkcs8',
+      keyData,
+      {
+        name: 'ECDSA',
+        namedCurve: 'P-256'
+      },
+      false,
+      ['sign']
+    );
+    
+    // Sign the message
+    const signature = await crypto.subtle.sign(
+      {
+        name: 'ECDSA',
+        hash: 'SHA-256'
+      },
+      cryptoKey,
+      new TextEncoder().encode(message)
+    );
+    
+    // Convert signature to base64url
+    const encodedSignature = btoa(String.fromCharCode(...new Uint8Array(signature)))
+      .replace(/[+/=]/g, (match) => {
+        switch (match) {
+          case '+': return '-';
+          case '/': return '_';
+          case '=': return '';
+          default: return match;
+        }
+      });
+    
+    return `${message}.${encodedSignature}`;
+  } catch (error) {
+    throw new Error(`JWT creation failed: ${error.message}`);
+  }
+}

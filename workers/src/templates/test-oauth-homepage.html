@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAML Test Service Provider - sso.broker</title>
+    <title>OAuth Test Service Provider - sso.broker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -300,90 +300,89 @@
     <main class="container mx-auto px-6 py-8">
         <!-- Header -->
         <div class="text-center mb-12">
-            <h1 class="text-4xl font-bold text-primary mb-4">🔐 SAML Test Service Provider</h1>
-            <p class="text-lg text-secondary">Test SAML authentication flows with sso.broker</p>
+            <h1 class="text-4xl font-bold text-primary mb-4">🔐 OAuth Test Service Provider</h1>
+            <p class="text-lg text-secondary">Test OAuth authentication flows with sso.broker</p>
+        </div>
+
+        <!-- Client Registration Section -->
+        <div class="bg-secondary border border-primary rounded-lg p-6 mb-8">
+            <h2 class="text-xl font-semibold text-primary mb-4 flex items-center gap-2">
+                🔑 Client Registration
+            </h2>
+            <p class="text-secondary mb-4">First, register a test client to get your client credentials:</p>
+            <div class="flex items-center gap-4 mb-4">
+                <button 
+                    onclick="registerClient()" 
+                    class="btn-primary px-6 py-3 rounded-lg font-medium transition-all hover:scale-105"
+                    id="registerBtn"
+                >
+                    Register Test Client
+                </button>
+                <div id="clientStatus" class="hidden">
+                    <div class="status success">
+                        <span>✅</span>
+                        <span>Client registered successfully!</span>
+                    </div>
+                </div>
+            </div>
+            <div id="clientCredentials" class="hidden bg-tertiary p-4 rounded-lg">
+                <h3 class="font-semibold text-primary mb-2">Your Client Credentials:</h3>
+                <div class="space-y-2 text-sm">
+                    <div>
+                        <span class="font-medium text-primary">Client ID:</span>
+                        <code class="text-secondary ml-2" id="clientId"></code>
+                    </div>
+                    <div>
+                        <span class="font-medium text-primary">Client Secret:</span>
+                        <code class="text-secondary ml-2" id="clientSecret"></code>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Provider Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-            <!-- Apple SAML -->
-            <div class="provider-card bg-secondary border border-primary rounded-lg p-6 text-center">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12" id="providerCards">
+            <!-- Apple OAuth -->
+            <div class="provider-card bg-secondary border border-primary rounded-lg p-6 text-center opacity-50">
                 <div class="text-5xl mb-4">🍎</div>
                 <h3 class="text-xl font-bold text-primary mb-2">Apple</h3>
-                <p class="text-secondary mb-6 text-sm">Test SAML authentication with Apple ID</p>
+                <p class="text-secondary mb-6 text-sm">Test OAuth authentication with Apple ID</p>
                 <button 
-                    onclick="testSamlFlow('apple')" 
+                    onclick="testOAuthFlow('apple')" 
                     class="btn-primary px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 w-full"
+                    disabled
                 >
-                    Test SAML Flow
+                    Test OAuth Flow
                 </button>
             </div>
 
-            <!-- Google SAML -->
-            <div class="provider-card bg-secondary border border-primary rounded-lg p-6 text-center">
+            <!-- Google OAuth -->
+            <div class="provider-card bg-secondary border border-primary rounded-lg p-6 text-center opacity-50">
                 <div class="text-5xl mb-4">🔍</div>
                 <h3 class="text-xl font-bold text-primary mb-2">Google</h3>
-                <p class="text-secondary mb-6 text-sm">Test SAML authentication with Google</p>
+                <p class="text-secondary mb-6 text-sm">Test OAuth authentication with Google</p>
                 <button 
-                    onclick="testSamlFlow('google')" 
+                    onclick="testOAuthFlow('google')" 
                     class="btn-primary px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 w-full"
+                    disabled
                 >
-                    Test SAML Flow
+                    Test OAuth Flow
                 </button>
             </div>
 
-            <!-- GitHub SAML -->
-            <div class="provider-card bg-secondary border border-primary rounded-lg p-6 text-center">
+            <!-- GitHub OAuth -->
+            <div class="provider-card bg-secondary border border-primary rounded-lg p-6 text-center opacity-50">
                 <div class="text-5xl mb-4">🐙</div>
                 <h3 class="text-xl font-bold text-primary mb-2">GitHub</h3>
-                <p class="text-secondary mb-6 text-sm">Test SAML authentication with GitHub</p>
+                <p class="text-secondary mb-6 text-sm">Test OAuth authentication with GitHub</p>
                 <button 
-                    onclick="testSamlFlow('github')" 
+                    onclick="testOAuthFlow('github')" 
                     class="btn-primary px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 w-full"
+                    disabled
                 >
-                    Test SAML Flow
+                    Test OAuth Flow
                 </button>
             </div>
-        </div>
-
-        <!-- Custom IdP Section -->
-        <div class="custom-idp-form bg-secondary border border-primary rounded-lg p-6 mb-8">
-            <h2 class="text-xl font-semibold text-primary mb-4 flex items-center gap-2">
-                ⚙️ Custom SAML Identity Provider
-            </h2>
-            <p class="text-secondary mb-4">Test with your own SAML Identity Provider by providing the SSO endpoint URL.</p>
-            
-            <div class="space-y-4">
-                <div>
-                    <label for="customIdpUrl" class="block text-sm font-medium text-primary mb-2">
-                        SAML IdP SSO URL:
-                    </label>
-                    <input 
-                        type="url" 
-                        id="customIdpUrl" 
-                        placeholder="https://your-idp.com/saml/sso"
-                        class="w-full p-3 border border-primary rounded-lg bg-primary text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
-                </div>
-                <div>
-                    <label for="customIdpEntityId" class="block text-sm font-medium text-primary mb-2">
-                        Entity ID (optional):
-                    </label>
-                    <input 
-                        type="text" 
-                        id="customIdpEntityId" 
-                        placeholder="your-idp-entity-id"
-                        class="w-full p-3 border border-primary rounded-lg bg-primary text-primary focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    />
-                </div>
-                <button 
-                    onclick="testCustomSamlFlow()" 
-                    class="btn-primary px-6 py-3 rounded-lg font-medium transition-all hover:scale-105"
-                >
-                    🚀 Test Custom SAML Flow
-                </button>
-            </div>
-            <div id="customIdpStatus"></div>
         </div>
 
         <!-- How it Works Section -->
@@ -392,11 +391,12 @@
                 📋 How it Works
             </h2>
             <ol class="text-secondary space-y-3 list-decimal list-inside">
-                <li>Click a "Test SAML Flow" button above or enter a custom IdP URL</li>
-                <li>You'll be redirected to the SAML Identity Provider</li>
+                <li>Click "Register Test Client" to get your client credentials</li>
+                <li>Click a "Test OAuth Flow" button above</li>
+                <li>You'll be redirected to the OAuth provider</li>
                 <li>Complete the authentication flow (e.g., log in with GitHub, then approve consent)</li>
-                <li>The SAML response will be posted back to this test endpoint</li>
-                <li>View the parsed SAML data and response details</li>
+                <li>The OAuth response will be posted back to this test endpoint</li>
+                <li>View the parsed OAuth data and authorization code</li>
             </ol>
         </div>
 
@@ -405,40 +405,40 @@
             <h2 class="text-xl font-semibold text-primary mb-4 flex items-center gap-2">
                 🔗 Test Endpoint
             </h2>
-            <p class="text-secondary mb-4">This mock Service Provider receives SAML responses at:</p>
+            <p class="text-secondary mb-4">This mock Service Provider receives OAuth responses at:</p>
             <div class="bg-tertiary p-4 rounded-lg mb-4">
-                <code class="text-primary font-mono text-sm">https://test-saml.sso.broker/saml/callback</code>
+                <code class="text-primary font-mono text-sm">https://test-oauth.sso.broker/oauth/callback</code>
             </div>
-            <p class="text-secondary">Use this URL as your <code class="bg-tertiary px-2 py-1 rounded text-sm">AssertionConsumerServiceURL</code> in SAML requests.</p>
+            <p class="text-secondary">Use this URL as your <code class="bg-tertiary px-2 py-1 rounded text-sm">redirect_uri</code> in OAuth requests.</p>
         </div>
 
-        <!-- Available IdPs Section -->
+        <!-- Available OAuth Providers Section -->
         <div class="bg-secondary border border-primary rounded-lg p-6 mb-8">
             <h2 class="text-xl font-semibold text-primary mb-4 flex items-center gap-2">
-                🏢 Available SAML Identity Providers
+                🏢 Available OAuth Providers
             </h2>
-            <p class="text-secondary mb-4">These are the endpoints for sso.broker acting as an IdP:</p>
+            <p class="text-secondary mb-4">These are the endpoints for sso.broker acting as an OAuth provider:</p>
             <div class="space-y-3">
                 <div class="flex items-center justify-between bg-tertiary p-3 rounded-lg">
                     <div>
-                        <span class="font-medium text-primary">Apple SAML:</span>
-                        <code class="text-secondary ml-2">https://apple-saml.sso.broker</code>
+                        <span class="font-medium text-primary">Apple OAuth:</span>
+                        <code class="text-secondary ml-2">https://apple.sso.broker</code>
                     </div>
-                    <a href="https://apple-saml.sso.broker/metadata" target="_blank" class="text-sm btn-secondary px-3 py-1 rounded">Metadata</a>
+                    <a href="https://apple.sso.broker/.well-known/openid-configuration" target="_blank" class="text-sm btn-secondary px-3 py-1 rounded">Discovery</a>
                 </div>
                 <div class="flex items-center justify-between bg-tertiary p-3 rounded-lg">
                     <div>
-                        <span class="font-medium text-primary">Google SAML:</span>
-                        <code class="text-secondary ml-2">https://google-saml.sso.broker</code>
+                        <span class="font-medium text-primary">Google OAuth:</span>
+                        <code class="text-secondary ml-2">https://google.sso.broker</code>
                     </div>
-                    <a href="https://google-saml.sso.broker/metadata" target="_blank" class="text-sm btn-secondary px-3 py-1 rounded">Metadata</a>
+                    <a href="https://google.sso.broker/.well-known/openid-configuration" target="_blank" class="text-sm btn-secondary px-3 py-1 rounded">Discovery</a>
                 </div>
                 <div class="flex items-center justify-between bg-tertiary p-3 rounded-lg">
                     <div>
-                        <span class="font-medium text-primary">GitHub SAML:</span>
-                        <code class="text-secondary ml-2">https://github-saml.sso.broker</code>
+                        <span class="font-medium text-primary">GitHub OAuth:</span>
+                        <code class="text-secondary ml-2">https://github.sso.broker</code>
                     </div>
-                    <a href="https://github-saml.sso.broker/metadata" target="_blank" class="text-sm btn-secondary px-3 py-1 rounded">Metadata</a>
+                    <a href="https://github.sso.broker/.well-known/openid-configuration" target="_blank" class="text-sm btn-secondary px-3 py-1 rounded">Discovery</a>
                 </div>
             </div>
         </div>
@@ -454,77 +454,111 @@
     </footer>
 
     <script>
-        function testSamlFlow(provider) {
-            console.log(`Testing SAML flow for provider: ${provider}`);
-            
-            try {
-                // Generate a simple SAML request for testing
-                const samlRequest = generateSamlRequest(provider);
-                
-                const encodedRequest = btoa(samlRequest);
-                
-                // Redirect to the SAML IdP
-                const idpUrl = `https://${provider}-saml.sso.broker/saml/sso?SAMLRequest=${encodeURIComponent(encodedRequest)}`;
-                
-                const popup = window.open(idpUrl, '_blank');
-                if (!popup) {
-                    console.error(`Failed to open popup for ${provider} - popup blocked?`);
-                    alert(`Popup blocked for ${provider}. Please allow popups for this site and try again.`);
-                } else {
-                    console.log(`Successfully opened popup for ${provider}`);
-                }
-            } catch (error) {
-                console.error(`Error testing SAML flow for ${provider}:`, error);
-                alert(`Error testing ${provider} SAML flow: ${error.message}`);
-            }
-        }
-        
-        function testCustomSamlFlow() {
-            const customIdpUrl = document.getElementById('customIdpUrl').value.trim();
-            const customEntityId = document.getElementById('customIdpEntityId').value.trim();
-            const statusDiv = document.getElementById('customIdpStatus');
-            
-            if (!customIdpUrl) {
-                statusDiv.innerHTML = '<div class="status error"><span>❌</span><span>Please enter a SAML IdP SSO URL.</span></div>';
-                return;
-            }
-            
-            // Validate URL format
-            try {
-                new URL(customIdpUrl);
-            } catch (e) {
-                statusDiv.innerHTML = '<div class="status error"><span>❌</span><span>Please enter a valid URL.</span></div>';
-                return;
-            }
-            
-            // Generate a simple SAML request for the custom IdP
-            const samlRequest = generateCustomSamlRequest(customIdpUrl, customEntityId);
-            const encodedRequest = btoa(samlRequest);
-            
-            // Redirect to the custom SAML IdP
-            const idpUrl = `${customIdpUrl}?SAMLRequest=${encodeURIComponent(encodedRequest)}`;
-            statusDiv.innerHTML = '<div class="status info"><span>ℹ️</span><span>Redirecting to custom IdP...</span></div>';
-            window.open(idpUrl, '_blank');
-        }
-        
-        function generateSamlRequest(provider) {
-            
-            const now = new Date().toISOString();
-            const requestId = '_test_' + Math.random().toString(36).substr(2, 9);
-            
-            const destination = `https://${provider}-saml.sso.broker/saml/sso`;
-            
-            const samlRequest = `<?xml version="1.0" encoding="UTF-8"?><samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="${requestId}" Version="2.0" IssueInstant="${now}" Destination="${destination}" AssertionConsumerServiceURL="https://test-saml.sso.broker/saml/callback" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"><saml:Issuer>urn:test-saml.sso.broker</saml:Issuer><samlp:NameIDPolicy Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress" AllowCreate="true"/></samlp:AuthnRequest>`;
+        let registeredClientId = null;
+        let registeredClientSecret = null;
 
-            return samlRequest;
+        async function registerClient() {
+            const registerBtn = document.getElementById('registerBtn');
+            const clientStatus = document.getElementById('clientStatus');
+            const clientCredentials = document.getElementById('clientCredentials');
+            const providerCards = document.getElementById('providerCards');
+
+            // Show loading state
+            registerBtn.textContent = 'Registering...';
+            registerBtn.disabled = true;
+
+            try {
+                // Register client with any of the OAuth providers (they all use the same registration endpoint)
+                const response = await fetch('https://github.sso.broker/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        client_name: 'OAuth Test Client',
+                        redirect_uris: ['https://test-oauth.sso.broker/oauth/callback']
+                    })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Registration error response:', errorText);
+                    throw new Error(`Registration failed: ${response.status} ${response.statusText} - ${errorText}`);
+                }
+
+                const clientData = await response.json();
+                console.log('Registration successful, client data:', clientData);
+                
+                // Validate the response has the expected fields
+                if (!clientData.client_id || !clientData.client_secret) {
+                    throw new Error('Invalid response from registration endpoint - missing client_id or client_secret');
+                }
+                
+                // Store client credentials
+                registeredClientId = clientData.client_id;
+                registeredClientSecret = clientData.client_secret;
+
+                // Show success state
+                registerBtn.textContent = 'Client Registered';
+                registerBtn.classList.remove('btn-primary');
+                registerBtn.classList.add('btn-secondary');
+                
+                // Show client credentials
+                document.getElementById('clientId').textContent = registeredClientId;
+                document.getElementById('clientSecret').textContent = registeredClientSecret;
+                clientCredentials.classList.remove('hidden');
+                clientStatus.classList.remove('hidden');
+
+                // Enable provider cards
+                providerCards.classList.remove('opacity-50');
+                const cards = providerCards.querySelectorAll('.provider-card');
+                const buttons = providerCards.querySelectorAll('button');
+                
+                // Remove opacity from cards and enable buttons
+                cards.forEach(card => {
+                    card.classList.remove('opacity-50');
+                });
+                
+                buttons.forEach(button => {
+                    button.disabled = false;
+                    button.classList.remove('opacity-50');
+                });
+
+            } catch (error) {
+                console.error('Client registration failed:', error);
+                registerBtn.textContent = 'Registration Failed';
+                registerBtn.classList.remove('btn-primary');
+                registerBtn.classList.add('btn-secondary');
+                
+                // Show error status
+                clientStatus.innerHTML = `
+                    <div class="status error">
+                        <span>❌</span>
+                        <span>Registration failed: ${error.message}</span>
+                    </div>
+                `;
+                clientStatus.classList.remove('hidden');
+            }
         }
-        
-        function generateCustomSamlRequest(idpUrl, entityId) {
-            const now = new Date().toISOString();
-            const requestId = '_custom_test_' + Math.random().toString(36).substr(2, 9);
-            const issuer = entityId || 'urn:test-saml.sso.broker';
+
+        function testOAuthFlow(provider) {
+            if (!registeredClientId) {
+                alert('Please register a client first!');
+                return;
+            }
+
+            // Generate a simple OAuth request for testing
+            const state = JSON.stringify({
+                provider: provider,
+                test: true,
+                timestamp: Date.now(),
+                client_id: registeredClientId
+            });
             
-            return `<?xml version="1.0" encoding="UTF-8"?><samlp:AuthnRequest xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion" ID="${requestId}" Version="2.0" IssueInstant="${now}" Destination="${idpUrl}" AssertionConsumerServiceURL="https://test-saml.sso.broker/saml/callback" ProtocolBinding="urn:oasis:names:tc:SAML:2.0:bindings:HTTP-POST"><saml:Issuer>${issuer}</saml:Issuer><samlp:NameIDPolicy Format="urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress" AllowCreate="true"/></samlp:AuthnRequest>`;
+            // Redirect to the OAuth provider
+            const oauthUrl = `https://${provider}.sso.broker/authorize?client_id=${encodeURIComponent(registeredClientId)}&redirect_uri=https://test-oauth.sso.broker/oauth/callback&response_type=code&scope=openid%20email&state=${encodeURIComponent(state)}`;
+            
+            window.open(oauthUrl, '_blank');
         }
     </script>
 </body>

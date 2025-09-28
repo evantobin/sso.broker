@@ -70,7 +70,7 @@ export default function SAMLInstructions({ activeTab, copiedText, isDarkMode, co
         <p className="mb-4" style={{ color: 'var(--text-secondary)' }}>Configure your SAML Service Provider with these settings:</p>
         <div className="relative">
           <button 
-            onClick={() => copyToClipboard(`Entity ID: https://${activeTab}-saml.sso.broker
+            onClick={() => copyToClipboard(`Entity ID: urn:${activeTab}-saml.sso.broker
 SSO URL: https://${activeTab}-saml.sso.broker/saml/sso
 SLO URL: https://${activeTab}-saml.sso.broker/saml/slo
 Name ID Format: urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress`)}
@@ -86,7 +86,7 @@ Name ID Format: urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress`)}
               e.currentTarget.style.backgroundColor = 'var(--copy-button-bg)';
             }}
           >
-            {copiedText === `Entity ID: https://${activeTab}-saml.sso.broker
+            {copiedText === `Entity ID: urn:${activeTab}-saml.sso.broker
 SSO URL: https://${activeTab}-saml.sso.broker/saml/sso
 SLO URL: https://${activeTab}-saml.sso.broker/saml/slo
 Name ID Format: urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress` ? 'Copied!' : 'Copy'}
@@ -112,7 +112,7 @@ Name ID Format: urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress` ? 'Copie
             wrapLongLines={true}
             className="syntax-highlighter-override"
           >
-{`Entity ID: https://${activeTab}-saml.sso.broker
+{`Entity ID: urn:${activeTab}-saml.sso.broker
 SSO URL: https://${activeTab}-saml.sso.broker/saml/sso
 SLO URL: https://${activeTab}-saml.sso.broker/saml/slo
 Name ID Format: urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress`}

@@ -393,17 +393,17 @@ Client IDs are cryptographically signed and contain all necessary information fo
 ### **SAML Providers** (on `*-saml.sso.broker` subdomains)
 
 #### **Apple SAML**
-- **Entity ID**: `https://apple-saml.sso.broker`
+- **Entity ID**: `urn:apple-saml.sso.broker`
 - **Name ID Format**: `urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress`
 - **Attributes**: Email address
 
 #### **Google SAML**
-- **Entity ID**: `https://google-saml.sso.broker`
+- **Entity ID**: `urn:google-saml.sso.broker`
 - **Name ID Format**: `urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress`
 - **Attributes**: Email address
 
 #### **GitHub SAML**
-- **Entity ID**: `https://github-saml.sso.broker`
+- **Entity ID**: `urn:github-saml.sso.broker`
 - **Name ID Format**: `urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress`
 - **Attributes**: Email address
 

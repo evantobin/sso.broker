@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth Response Test Endpoint - sso.broker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            DEFAULT: 'var(--text-primary)',
+                            50: 'var(--bg-tertiary)',
+                            100: 'var(--bg-tertiary)',
+                            200: 'var(--border-secondary)',
+                            300: 'var(--border-secondary)',
+                            400: 'var(--text-tertiary)',
+                            500: 'var(--text-secondary)',
+                            600: 'var(--text-secondary)',
+                            700: 'var(--text-primary)',
+                            800: 'var(--text-primary)',
+                            900: 'var(--text-primary)',
+                        },
+                        secondary: {
+                            DEFAULT: 'var(--text-secondary)',
+                        },
+                        tertiary: {
+                            DEFAULT: 'var(--text-tertiary)',
+                        }
+                    },
+                    backgroundColor: {
+                        primary: 'var(--bg-primary)',
+                        secondary: 'var(--bg-secondary)',
+                        tertiary: 'var(--bg-tertiary)',
+                    },
+                    textColor: {
+                        primary: 'var(--text-primary)',
+                        secondary: 'var(--text-secondary)',
+                        tertiary: 'var(--text-tertiary)',
+                    },
+                    borderColor: {
+                        primary: 'var(--border-primary)',
+                        secondary: 'var(--border-secondary)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* CSS Custom Properties for theming */
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --bg-tertiary: #f3f4f6;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --text-tertiary: #9ca3af;
+            --border-primary: #e5e7eb;
+            --border-secondary: #d1d5db;
+            --button-primary: #111827;
+            --button-primary-hover: #374151;
+            --button-secondary: #f3f4f6;
+            --button-secondary-hover: #e5e7eb;
+            --code-bg: #f8fafc;
+            --copy-button-bg: #111827;
+            --copy-button-hover: #374151;
+            --copy-button-text: #ffffff;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-primary: #111827;
+                --bg-secondary: #1f2937;
+                --bg-tertiary: #374151;
+                --text-primary: #f9fafb;
+                --text-secondary: #d1d5db;
+                --text-tertiary: #9ca3af;
+                --border-primary: #374151;
+                --border-secondary: #4b5563;
+                --button-primary: #f9fafb;
+                --button-primary-hover: #e5e7eb;
+                --button-secondary: #374151;
+                --button-secondary-hover: #4b5563;
+                --code-bg: #1f2937;
+                --copy-button-bg: #f9fafb;
+                --copy-button-hover: #e5e7eb;
+                --copy-button-text: #111827;
+            }
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-tertiary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-tertiary);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-secondary);
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Code block styling */
+        pre {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            line-height: 1.5;
+            overflow-x: auto;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        /* Ensure code blocks don't overflow */
+        pre code {
+            white-space: pre-wrap;
+            word-break: break-all;
+            overflow-wrap: anywhere;
+        }
+
+        /* Force break long URLs and code strings */
+        pre, code {
+            word-break: break-all;
+            overflow-wrap: anywhere;
+            hyphens: none;
+        }
+
+        /* Button hover effects */
+        button {
+            transition: all 0.15s ease-in-out;
+        }
+
+        /* Global link styles */
+        a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: opacity 0.15s ease-in-out;
+        }
+
+        a:hover {
+            opacity: 0.8;
+        }
+
+        a:visited {
+            color: var(--text-secondary);
+        }
+
+        /* Utility classes */
+        .text-primary { color: var(--text-primary); }
+        .text-secondary { color: var(--text-secondary); }
+        .text-tertiary { color: var(--text-tertiary); }
+        .bg-primary { background-color: var(--bg-primary); }
+        .bg-secondary { background-color: var(--bg-secondary); }
+        .bg-tertiary { background-color: var(--bg-tertiary); }
+        .border-primary { border-color: var(--border-primary); }
+        .border-secondary { border-color: var(--border-secondary); }
+
+
+        /* Button classes */
+        .btn-primary {
+            background-color: var(--button-primary);
+            color: var(--bg-primary);
+            border: 1px solid var(--button-primary);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--button-primary-hover);
+            border-color: var(--button-primary-hover);
+        }
+
+        .btn-secondary {
+            background-color: var(--button-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+
+        .btn-secondary:hover {
+            background-color: var(--button-secondary-hover);
+            border-color: var(--border-secondary);
+        }
+
+        .copy-btn {
+            background-color: var(--copy-button-bg);
+            color: var(--copy-button-text);
+            border: 1px solid var(--copy-button-bg);
+        }
+
+        .copy-btn:hover {
+            background-color: var(--copy-button-hover);
+            border-color: var(--copy-button-hover);
+        }
+
+        /* Brand logo classes */
+        .brand-logo {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-weight: 900;
+            letter-spacing: -0.025em;
+        }
+
+        .brand-logo-large {
+            font-size: 2.5rem;
+        }
+
+        .brand-logo-medium {
+            font-size: 2rem;
+        }
+
+        /* Status styles */
+        .status {
+            padding: 1rem 1.25rem;
+            border-radius: 0.5rem;
+            margin: 1rem 0;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .status.success {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+
+        .status.error {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+
+        .status.info {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-primary);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-primary text-primary">
+    <!-- Navigation -->
+    <nav class="border-b border-primary">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <a href="/" class="flex items-center">
+                    <h1 class="text-3xl font-black tracking-tight brand-logo brand-logo-large">
+                        sso.broker
+                    </h1>
+                </a>
+                <div class="flex items-center gap-4">
+                    <a 
+                        href="https://github.com/evantobin/sso.broker" 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        class="inline-flex items-center gap-2 px-3 py-2 rounded-full text-sm font-medium transition-all hover:scale-105 btn-secondary"
+                    >
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        <span class="hidden sm:inline">Source Code</span>
+                        <span class="sm:hidden">Code</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 py-8">
+        {{#hasData}}
+        <!-- Header -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl font-bold text-primary mb-4">{{#success}}🎉 OAuth Response Received{{/success}}{{^success}}❌ OAuth Error{{/success}}</h1>
+            <p class="text-lg text-secondary">{{message}}</p>
+        </div>
+
+        <!-- OAuth Response Data -->
+        <div class="bg-secondary border border-primary rounded-lg p-8 mb-8">
+            <h2 class="text-2xl font-semibold text-primary mb-6">OAuth Response Data</h2>
+            
+            <div class="space-y-6">
+                <!-- Authorization Code (if success) -->
+                {{#success}}
+                {{#data.code}}
+                <div>
+                    <h3 class="text-lg font-semibold text-primary mb-3">Authorization Code</h3>
+                    <div class="bg-tertiary p-4 rounded-lg mb-3">
+                        <code class="text-primary font-mono text-sm">{{data.code}}</code>
+                    </div>
+                    <p class="text-secondary text-sm">
+                        This authorization code can be exchanged for an access token using the token endpoint.
+                    </p>
+                </div>
+                {{/data.code}}
+                {{/success}}
+
+                <!-- Token Exchange Form (if we have tokenData but no actual tokens yet) -->
+                {{#success}}
+                {{#data.tokenData}}
+                {{^data.tokenData.access_token}}
+                <div>
+                    <h3 class="text-lg font-semibold text-primary mb-3">Exchange Authorization Code for Tokens</h3>
+                    <div class="bg-tertiary p-4 rounded-lg mb-3">
+                        {{#note}}
+                        <p class="text-secondary mb-4">{{note}}</p>
+                        {{/note}}
+                        
+                        <div class="space-y-4">
+                            <div class="bg-tertiary p-4 rounded-lg mb-4">
+                                <p class="text-secondary text-sm mb-3">
+                                    <strong>Note:</strong> This will perform a real token exchange with the OAuth provider. Enter your client secret below.
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <label for="client_secret" class="block text-sm font-medium text-primary mb-2">
+                                    Client Secret
+                                </label>
+                                <input 
+                                    type="password" 
+                                    id="client_secret" 
+                                    name="client_secret" 
+                                    required
+                                    class="w-full px-3 py-2 border border-primary rounded-lg bg-primary text-primary focus:outline-none focus:ring-2 focus:ring-primary"
+                                    placeholder="Enter your client secret"
+                                >
+                            </div>
+                            
+                            <button 
+                                type="button"
+                                onclick="exchangeTokens()"
+                                id="exchangeBtn"
+                                class="w-full px-4 py-2 rounded-lg font-medium transition-all hover:scale-105 btn-primary"
+                            >
+                                Exchange for Tokens
+                            </button>
+                            
+                            <div id="exchangeStatus" class="hidden">
+                                <div class="status info">
+                                    <span>⏳</span>
+                                    <span>Exchanging tokens...</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 pt-4 border-t border-primary">
+                            <div class="space-y-2 text-sm">
+                                {{#authorization_code}}
+                                <div>
+                                    <span class="font-medium text-primary">Authorization Code:</span>
+                                    <code class="text-secondary ml-2">{{authorization_code}}</code>
+                                </div>
+                                {{/authorization_code}}
+                                {{#client_id}}
+                                <div>
+                                    <span class="font-medium text-primary">Client ID:</span>
+                                    <code class="text-secondary ml-2">{{client_id}}</code>
+                                </div>
+                                {{/client_id}}
+                                {{#redirect_uri}}
+                                <div>
+                                    <span class="font-medium text-primary">Redirect URI:</span>
+                                    <code class="text-secondary ml-2">{{redirect_uri}}</code>
+                                </div>
+                                {{/redirect_uri}}
+                                {{#token_endpoint}}
+                                <div>
+                                    <span class="font-medium text-primary">Token Endpoint:</span>
+                                    <code class="text-secondary ml-2">{{token_endpoint}}</code>
+                                </div>
+                                {{/token_endpoint}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{/data.tokenData.access_token}}
+                {{/data.tokenData}}
+                {{/success}}
+
+                <!-- Token Information (if we have actual tokens) -->
+                {{#success}}
+                {{#data.tokenData}}
+                {{#data.tokenData.access_token}}
+                <div>
+                    <h3 class="text-lg font-semibold text-primary mb-3">Token Exchange Results</h3>
+                    <div class="bg-tertiary p-4 rounded-lg mb-3">
+                        <div class="space-y-2 text-sm">
+                            {{#access_token}}
+                            <div>
+                                <span class="font-medium text-primary">Access Token:</span>
+                                <code class="text-secondary ml-2 break-all">{{access_token}}</code>
+                            </div>
+                            {{/access_token}}
+                            {{#token_type}}
+                            <div>
+                                <span class="font-medium text-primary">Token Type:</span>
+                                <code class="text-secondary ml-2">{{token_type}}</code>
+                            </div>
+                            {{/token_type}}
+                            {{#expires_in}}
+                            <div>
+                                <span class="font-medium text-primary">Expires In:</span>
+                                <code class="text-secondary ml-2">{{expires_in}} seconds</code>
+                            </div>
+                            {{/expires_in}}
+                            {{#refresh_token}}
+                            <div>
+                                <span class="font-medium text-primary">Refresh Token:</span>
+                                <code class="text-secondary ml-2 break-all">{{refresh_token}}</code>
+                            </div>
+                            {{/refresh_token}}
+                            {{#scope}}
+                            <div>
+                                <span class="font-medium text-primary">Scope:</span>
+                                <code class="text-secondary ml-2">{{scope}}</code>
+                            </div>
+                            {{/scope}}
+                        </div>
+                    </div>
+                </div>
+                {{/data.tokenData.access_token}}
+                {{/data.tokenData}}
+                {{/success}}
+
+                <!-- Error Information (if error) -->
+                {{^success}}
+                {{#data.error}}
+                <div>
+                    <h3 class="text-lg font-semibold text-primary mb-3">Error</h3>
+                    <div class="bg-tertiary border border-primary rounded-lg p-4">
+                        <p class="font-semibold text-primary">{{data.error}}</p>
+                        {{#data.errorDescription}}
+                        <p class="text-secondary mt-1">{{data.errorDescription}}</p>
+                        {{/data.errorDescription}}
+                    </div>
+                </div>
+                {{/data.error}}
+                {{/success}}
+
+                <!-- State Parameter -->
+                {{#data.state}}
+                <div>
+                    <h3 class="text-lg font-semibold text-primary mb-3">State Parameter</h3>
+                    <div class="bg-tertiary p-4 rounded-lg mb-3">
+                        <pre class="text-primary font-mono text-sm">{{data.state}}</pre>
+                    </div>
+                    <p class="text-secondary text-sm">
+                        The state parameter helps maintain state between the request and callback.
+                    </p>
+                </div>
+                {{/data.state}}
+
+                <!-- Timestamp -->
+                {{#data.timestamp}}
+                <div>
+                    <h3 class="text-lg font-semibold text-primary mb-3">Timestamp</h3>
+                    <div class="bg-tertiary p-4 rounded-lg">
+                        <p class="font-mono text-primary">{{data.timestamp}}</p>
+                    </div>
+                </div>
+                {{/data.timestamp}}
+
+                <!-- Full URL -->
+                {{#data.url}}
+                <div>
+                    <h3 class="text-lg font-semibold text-primary mb-3">Callback URL</h3>
+                    <div class="bg-tertiary p-4 rounded-lg mb-3">
+                        <code class="text-primary font-mono text-sm">{{data.url}}</code>
+                    </div>
+                    <p class="text-secondary text-sm">
+                        The complete callback URL with all parameters.
+                    </p>
+                </div>
+                {{/data.url}}
+            </div>
+        </div>
+
+        <!-- Next Steps -->
+        <div class="bg-secondary border border-primary rounded-lg p-8 mb-8">
+            <h2 class="text-xl font-semibold text-primary mb-4">Next Steps</h2>
+            {{#success}}
+            <div class="space-y-4">
+                <div class="flex items-start space-x-3">
+                    <div class="bg-primary text-bg-primary rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">1</div>
+                    <div>
+                        <p class="font-semibold text-primary">Exchange Authorization Code</p>
+                        <p class="text-secondary text-sm">Use the authorization code above to exchange for an access token via the token endpoint.</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <div class="bg-primary text-bg-primary rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">2</div>
+                    <div>
+                        <p class="font-semibold text-primary">Validate State Parameter</p>
+                        <p class="text-secondary text-sm">Verify the state parameter matches what you sent in the original request.</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <div class="bg-primary text-bg-primary rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">3</div>
+                    <div>
+                        <p class="font-semibold text-primary">Complete Integration</p>
+                        <p class="text-secondary text-sm">Use the access token to make authenticated requests to the OAuth provider's API.</p>
+                    </div>
+                </div>
+            </div>
+            {{/success}}
+            {{^success}}
+            <div class="space-y-4">
+                <div class="flex items-start space-x-3">
+                    <div class="bg-primary text-bg-primary rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">1</div>
+                    <div>
+                        <p class="font-semibold text-primary">Check Error Details</p>
+                        <p class="text-secondary text-sm">Review the error information above to understand what went wrong.</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <div class="bg-primary text-bg-primary rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">2</div>
+                    <div>
+                        <p class="font-semibold text-primary">Verify Configuration</p>
+                        <p class="text-secondary text-sm">Ensure your OAuth application is properly configured with the provider.</p>
+                    </div>
+                </div>
+                <div class="flex items-start space-x-3">
+                    <div class="bg-primary text-bg-primary rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold">3</div>
+                    <div>
+                        <p class="font-semibold text-primary">Retry Authentication</p>
+                        <p class="text-secondary text-sm">Try the authentication flow again after fixing any configuration issues.</p>
+                    </div>
+                </div>
+            </div>
+            {{/success}}
+        </div>
+        {{/hasData}}
+
+        {{^hasData}}
+        <!-- No Data State -->
+        <div class="bg-secondary border border-primary rounded-lg p-8 text-center">
+            <div class="text-6xl mb-4">⏳</div>
+            <h2 class="text-2xl font-bold text-primary mb-2">Ready for OAuth Callback</h2>
+            <p class="text-secondary mb-6">{{message}}</p>
+            <div class="bg-tertiary border border-primary rounded-lg p-6">
+                <h3 class="font-semibold text-primary mb-2">This endpoint is ready to receive OAuth responses</h3>
+                <p class="text-secondary text-sm">
+                    Use <code class="bg-primary text-bg-primary px-2 py-1 rounded">https://test-oauth.sso.broker/oauth/callback</code> 
+                    as your redirect URI when testing OAuth flows.
+                </p>
+            </div>
+        </div>
+        {{/hasData}}
+
+        <!-- Back to Test Page -->
+        <div class="text-center">
+            <a 
+                href="https://test-oauth.sso.broker" 
+                class="inline-flex items-center px-6 py-3 rounded-lg font-medium transition-all hover:scale-105 btn-primary"
+            >
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to Test Page
+            </a>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-primary bg-secondary">
+        <div class="container mx-auto px-6 py-8">
+            <div class="text-center text-secondary">
+                <p>Powered by <a href="https://sso.broker" target="_blank" class="text-primary hover:underline">sso.broker</a> - Universal SSO Broker</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Store the OAuth data for token exchange
+        const oauthData = {
+            authorization_code: '{{data.tokenData.authorization_code}}',
+            client_id: '{{data.tokenData.client_id}}',
+            provider: '{{data.tokenData.provider}}'
+        };
+
+        async function exchangeTokens() {
+            const exchangeBtn = document.getElementById('exchangeBtn');
+            const exchangeStatus = document.getElementById('exchangeStatus');
+
+            // Show loading state
+            exchangeBtn.disabled = true;
+            exchangeBtn.textContent = 'Exchanging...';
+            exchangeStatus.classList.remove('hidden');
+
+            try {
+                // Get the client secret from the input field
+                const clientSecretInput = document.getElementById('client_secret');
+                const clientSecret = clientSecretInput.value.trim();
+                
+                if (!clientSecret) {
+                    showError('Client secret is required for token exchange');
+                    clientSecretInput.focus();
+                    return;
+                }
+
+                // Get the provider domain from the referrer or use the provider name
+                let providerDomain;
+                if (document.referrer) {
+                    try {
+                        const referrerUrl = new URL(document.referrer);
+                        providerDomain = referrerUrl.hostname;
+                    } catch (e) {
+                        // Fallback to provider name if referrer parsing fails
+                        providerDomain = `${oauthData.provider}.sso.broker`;
+                    }
+                } else {
+                    // Fallback to provider name if no referrer
+                    providerDomain = `${oauthData.provider}.sso.broker`;
+                }
+                
+                // Call the provider's token endpoint directly
+                const providerTokenUrl = `https://${providerDomain}/token`;
+                
+                const formData = new FormData();
+                formData.append('grant_type', 'authorization_code');
+                formData.append('code', oauthData.authorization_code);
+                formData.append('client_id', oauthData.client_id);
+                formData.append('client_secret', clientSecret);
+                formData.append('redirect_uri', 'https://test-oauth.sso.broker/oauth/callback');
+
+                const response = await fetch(providerTokenUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const responseText = await response.text();
+                let tokenData;
+
+                try {
+                    tokenData = JSON.parse(responseText);
+                } catch (parseError) {
+                    showError(`Invalid response from token endpoint: ${responseText.substring(0, 200)}... (Status: ${response.status})`);
+                    return;
+                }
+
+                if (response.ok) {
+                    // Decode the authorization code to get user info for display
+                    let codeData;
+                    try {
+                        codeData = JSON.parse(atob(oauthData.authorization_code));
+                        tokenData.user_info = {
+                            email: codeData.userEmail || 'Unknown',
+                            name: 'User',
+                            sub: codeData.userEmail || 'unknown'
+                        };
+                    } catch (e) {
+                        // If we can't decode, just show the token data without user info
+                    }
+
+                    // Show success - update the page with token data
+                    showTokenResults(tokenData);
+                } else {
+                    showError(`Token exchange failed: ${tokenData.error || tokenData.error_description || 'Unknown error'} (Status: ${response.status})`);
+                }
+            } catch (error) {
+                showError('Network error: ' + error.message);
+            } finally {
+                // Reset button state
+                exchangeBtn.disabled = false;
+                exchangeBtn.textContent = 'Exchange for Tokens';
+                exchangeStatus.classList.add('hidden');
+            }
+        }
+
+        function showTokenResults(tokenData) {
+            // Hide the form and show the token results
+            const formSection = document.querySelector('.space-y-4').parentElement;
+            formSection.innerHTML = `
+                <h3 class="text-lg font-semibold text-primary mb-3">Token Exchange Results</h3>
+                <div class="bg-tertiary p-4 rounded-lg mb-3">
+                    <div class="space-y-2 text-sm">
+                        ${tokenData.access_token ? `
+                            <div>
+                                <span class="font-medium text-primary">Access Token:</span>
+                                <code class="text-secondary ml-2 break-all">${tokenData.access_token}</code>
+                            </div>
+                        ` : ''}
+                        ${tokenData.token_type ? `
+                            <div>
+                                <span class="font-medium text-primary">Token Type:</span>
+                                <code class="text-secondary ml-2">${tokenData.token_type}</code>
+                            </div>
+                        ` : ''}
+                        ${tokenData.expires_in ? `
+                            <div>
+                                <span class="font-medium text-primary">Expires In:</span>
+                                <code class="text-secondary ml-2">${tokenData.expires_in} seconds</code>
+                            </div>
+                        ` : ''}
+                        ${tokenData.refresh_token ? `
+                            <div>
+                                <span class="font-medium text-primary">Refresh Token:</span>
+                                <code class="text-secondary ml-2 break-all">${tokenData.refresh_token}</code>
+                            </div>
+                        ` : ''}
+                        ${tokenData.scope ? `
+                            <div>
+                                <span class="font-medium text-primary">Scope:</span>
+                                <code class="text-secondary ml-2">${tokenData.scope}</code>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+                ${tokenData.user_info ? `
+                    <h4 class="text-md font-semibold text-primary mb-3">User Information</h4>
+                    <div class="bg-tertiary p-4 rounded-lg mb-3">
+                        <div class="space-y-2 text-sm">
+                            ${tokenData.user_info.email ? `
+                                <div>
+                                    <span class="font-medium text-primary">Email:</span>
+                                    <code class="text-secondary ml-2">${tokenData.user_info.email}</code>
+                                </div>
+                            ` : ''}
+                            ${tokenData.user_info.name ? `
+                                <div>
+                                    <span class="font-medium text-primary">Name:</span>
+                                    <code class="text-secondary ml-2">${tokenData.user_info.name}</code>
+                                </div>
+                            ` : ''}
+                            ${tokenData.user_info.sub ? `
+                                <div>
+                                    <span class="font-medium text-primary">Subject ID:</span>
+                                    <code class="text-secondary ml-2">${tokenData.user_info.sub}</code>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                ` : ''}
+            `;
+        }
+
+        function showError(errorMessage) {
+            const exchangeStatus = document.getElementById('exchangeStatus');
+            exchangeStatus.innerHTML = `
+                <div class="status error">
+                    <span>❌</span>
+                    <span>${errorMessage}</span>
+                </div>
+            `;
+            exchangeStatus.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

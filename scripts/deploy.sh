@@ -178,6 +178,21 @@ else
     echo "$TEST_SAML_ROUTE_RESULT" | jq -r '.errors[]?.message // "Unknown error"'
 fi
 
+# Test OAuth subdomain route (mock SP)
+echo "Creating test-oauth subdomain route..."
+TEST_OAUTH_ROUTE_RESULT=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/workers/routes" \
+  -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  --data "{\"pattern\":\"test-oauth.$DOMAIN/*\",\"script\":\"sso-broker\"}")
+
+TEST_OAUTH_ROUTE_SUCCESS=$(echo "$TEST_OAUTH_ROUTE_RESULT" | jq -r '.success')
+if [ "$TEST_OAUTH_ROUTE_SUCCESS" = "true" ]; then
+    echo "✅ Test OAuth subdomain route created successfully"
+else
+    echo "❌ Failed to create test-oauth subdomain route:"
+    echo "$TEST_OAUTH_ROUTE_RESULT" | jq -r '.errors[]?.message // "Unknown error"'
+fi
+
 echo "✅ Worker routes created!"
 
 # Create DNS records for subdomains
@@ -291,6 +306,21 @@ else
     echo "$TEST_SAML_DNS_RESULT" | jq -r '.errors[]?.message // "Unknown error"'
 fi
 
+# Test OAuth subdomain DNS (mock SP)
+echo "Creating test-oauth subdomain DNS record..."
+TEST_OAUTH_DNS_RESULT=$(curl -s -X POST "https://api.cloudflare.com/client/v4/zones/$ZONE_ID/dns_records" \
+  -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  --data "{\"type\":\"CNAME\",\"name\":\"test-oauth\",\"content\":\"sso-broker.me-8f4.workers.dev\",\"proxied\":true}")
+
+TEST_OAUTH_DNS_SUCCESS=$(echo "$TEST_OAUTH_DNS_RESULT" | jq -r '.success')
+if [ "$TEST_OAUTH_DNS_SUCCESS" = "true" ]; then
+    echo "✅ Test OAuth subdomain DNS record created successfully (proxied)"
+else
+    echo "❌ Failed to create test-oauth subdomain DNS record:"
+    echo "$TEST_OAUTH_DNS_RESULT" | jq -r '.errors[]?.message // "Unknown error"'
+fi
+
 echo "✅ DNS records created!"
 
 # Set up main domain for Pages
@@ -327,6 +357,7 @@ echo "  - Apple SAML: https://apple-saml.sso.broker"
 echo "  - Google SAML: https://google-saml.sso.broker"
 echo "  - GitHub SAML: https://github-saml.sso.broker"
 echo "  - Test SAML SP: https://test-saml.sso.broker"
+echo "  - Test OAuth SP: https://test-oauth.sso.broker"
 echo "  - Direct worker: https://sso-broker.me-8f4.workers.dev"
 echo ""
 echo "Next steps:"
@@ -347,4 +378,5 @@ echo "   - Apple SAML: https://apple-saml.sso.broker/metadata"
 echo "   - Google SAML: https://google-saml.sso.broker/metadata"
 echo "   - GitHub SAML: https://github-saml.sso.broker/metadata"
 echo "   - Test SAML SP: https://test-saml.sso.broker"
+echo "   - Test OAuth SP: https://test-oauth.sso.broker"
 echo "   - Main site: https://sso.broker"

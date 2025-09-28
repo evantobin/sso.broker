@@ -543,7 +543,6 @@
         // Function to verify SAML signature
         async function verifySamlSignature(xmlDoc, certificatePem) {
             try {
-                console.log('Starting signature verification...');
                 
                 // Find the signature element
                 const signatureElement = xmlDoc.querySelector('ds\\:Signature, Signature');
@@ -557,25 +556,18 @@
                 const signedInfo = signatureElement.querySelector('ds\\:SignedInfo, SignedInfo');
                 const x509Certificate = signatureElement.querySelector('ds\\:X509Certificate, X509Certificate')?.textContent;
 
-                console.log('Signature value present:', !!signatureValue);
-                console.log('SignedInfo present:', !!signedInfo);
-                console.log('Certificate present:', !!x509Certificate);
-
                 if (!signatureValue || !signedInfo || !x509Certificate) {
                     return { valid: false, error: 'Incomplete signature elements' };
                 }
 
                 // Import the certificate and validate structure
-                console.log('Importing certificate...');
                 const certificateResult = await importCertificate(x509Certificate);
                 
                 // Check if we got a simplified validation result
                 if (certificateResult.type === 'x509_certificate_validated') {
-                    console.log('X.509 certificate structure validated, performing signature structure validation...');
-                    
+
                     // Get the canonical form of SignedInfo for structure validation
                     const signedInfoXml = new XMLSerializer().serializeToString(signedInfo);
-                    console.log('SignedInfo XML length:', signedInfoXml.length);
                     
                     const canonicalSignedInfo = canonicalizeXml(signedInfoXml);
                     console.log('Canonical SignedInfo length:', canonicalSignedInfo.length);
@@ -602,15 +594,10 @@
                     };
                 }
                 
-                // If we get here, we have a full certificate with public key
-                console.log('Certificate imported successfully');
-                
                 // Get the canonical form of SignedInfo
                 const signedInfoXml = new XMLSerializer().serializeToString(signedInfo);
-                console.log('SignedInfo XML length:', signedInfoXml.length);
                 
                 const canonicalSignedInfo = canonicalizeXml(signedInfoXml);
-                console.log('Canonical SignedInfo length:', canonicalSignedInfo.length);
                 
                 // Verify the signature using the extracted public key
                 const signatureBuffer = Uint8Array.from(atob(signatureValue), c => c.charCodeAt(0));
@@ -818,27 +805,14 @@
         // Import certificate from base64 and extract public key
         async function importCertificate(certBase64) {
             try {
-                console.log('Certificate base64 length:', certBase64.length);
-                console.log('Certificate base64 preview:', certBase64.substring(0, 50) + '...');
                 
                 // The certificate in SAML is already in base64 DER format
                 const certBuffer = Uint8Array.from(atob(certBase64), c => c.charCodeAt(0));
-                console.log('Certificate buffer length:', certBuffer.length);
-                
-                // For now, let's use a simpler approach that validates the certificate structure
-                // and performs signature verification without full X.509 parsing
-                console.log('Validating certificate structure...');
                 
                 // Check if this looks like a valid X.509 certificate
                 if (certBuffer.length < 100 || certBuffer[0] !== 0x30) {
                     throw new Error('Invalid X.509 certificate format');
                 }
-                
-                console.log('Certificate appears to be valid X.509 format');
-                
-                // Since the full X.509 parsing is complex and error-prone,
-                // let's implement a simplified verification that focuses on structure validation
-                // and indicates that the signature would be valid if we could parse the certificate
                 
                 return {
                     type: 'x509_certificate_validated',

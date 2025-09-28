@@ -37,6 +37,13 @@ export async function routeRequest(request, env, url, pathname, host) {
     if (result) return result;
   }
   
+  // Special handling for test-oauth.sso.broker (mock SP)
+  if (host === 'test-oauth.sso.broker') {
+    const { handleTestOAuthRequest } = await import('./handlers/test-oauth.js');
+    const result = await handleTestOAuthRequest(request, env, url, pathname, host);
+    if (result) return result;
+  }
+  
   // Route to appropriate handler based on host and path
   if (isSamlRequest(host, pathname)) {
     const { handleSamlRequest } = await import('./handlers/saml.js');

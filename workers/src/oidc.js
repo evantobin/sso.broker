@@ -6,23 +6,31 @@ export function getProviderConfigs(env) {
   return {
     'apple': {
       clientId: env.APPLE_CLIENT_ID || '',
-      clientSecret: env.APPLE_CLIENT_SECRET || '',
+      clientSecret: env.APPLE_CLIENT_SECRET || '', // This contains the private key
       redirectUri: env.APPLE_REDIRECT_URI || 'https://apple.sso.broker/callback',
+      authorization_endpoint: 'https://appleid.apple.com/auth/authorize',
       scope: 'name email',
-      responseType: 'code'
+      scopes: ['name', 'email'],
+      responseType: 'code',
+      teamId: env.APPLE_TEAM_ID || '',
+      keyId: env.APPLE_KEY_ID || ''
     },
     'google': {
       clientId: env.GOOGLE_CLIENT_ID || '',
       clientSecret: env.GOOGLE_CLIENT_SECRET || '',
       redirectUri: env.GOOGLE_REDIRECT_URI || 'https://google.sso.broker/callback',
+      authorization_endpoint: 'https://accounts.google.com/o/oauth2/v2/auth',
       scope: 'openid email profile',
+      scopes: ['openid', 'email', 'profile'],
       responseType: 'code'
     },
     'github': {
       clientId: env.GITHUB_CLIENT_ID || '',
       clientSecret: env.GITHUB_CLIENT_SECRET || '',
       redirectUri: env.GITHUB_REDIRECT_URI || 'https://github.sso.broker/callback',
+      authorization_endpoint: 'https://github.com/login/oauth/authorize',
       scope: 'user:email',
+      scopes: ['user:email'],
       responseType: 'code'
     }
   };
@@ -87,8 +95,8 @@ export async function showConsentScreen(url, clientId, state, redirectUri, provi
     oidc: true,
     providerKey: providerKey,
     redirectUri: redirectUri,
-    allowUrl: `${url}?consent=allow&state=${state}`,
-    denyUrl: `${url}?consent=deny&state=${state}`
+    allowUrl: `${url.origin}/consent?consent=allow&state=${encodeURIComponent(state)}`,
+    denyUrl: `${url.origin}/consent?consent=deny&state=${encodeURIComponent(state)}`
   };
 
   // Render the template

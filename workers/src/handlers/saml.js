@@ -1,7 +1,7 @@
 // SAML request handlers
 
 import { validateSignedEmailCode, generateSignedEmailCode } from '../crypto.js';
-import { getSamlConfigs, getSamlProviderFromHost, generateSamlMetadata, parseSamlRequest, generateSamlResponse, signSamlResponse, showSamlConsentScreen } from '../saml.js';
+import { getSamlConfigs, getSamlProviderFromHost, generateSamlMetadata, parseSamlRequest, generateSamlResponse, showSamlConsentScreen } from '../saml.js';
 import { getUserEmailFromOAuthProvider, getOAuthUrl } from '../oauth/index.js';
 import { getProviderConfigs } from '../oidc.js';
 import { jsonResponse, errorResponse, logRequest, logError } from '../utils.js';
@@ -38,14 +38,37 @@ export async function handleSamlRequest(request, env, url, pathname, host) {
 
   // SAML SSO endpoint
   if (pathname === '/saml/sso') {
+    
     if (!config) {
       return errorResponse('SAML provider not found for this subdomain', 404);
     }
     
-    const samlRequest = url.searchParams.get('SAMLRequest');
-    const relayState = url.searchParams.get('RelayState');
-    const consent = url.searchParams.get('consent');
+    let samlRequest, relayState, consent;
     
+    // Handle both GET and POST requests
+    if (request.method === 'POST') {
+      try {
+        const formData = await request.formData();
+        samlRequest = formData.get('SAMLRequest');
+        relayState = formData.get('RelayState');
+        consent = formData.get('consent');
+      } catch (e) {
+        logError(new Error('Failed to parse form data from POST request'), { provider: providerKey, error: e.message }, env);
+        return errorResponse('Failed to parse SAML request data', 400);
+      }
+    } else {
+      // GET request - parameters in query string
+      samlRequest = url.searchParams.get('SAMLRequest');
+      relayState = url.searchParams.get('RelayState');
+      consent = url.searchParams.get('consent');
+    }
+    
+    // Log RelayState for debugging
+    if (relayState) {
+      console.log(`SAML SSO: RelayState received: ${relayState.substring(0, 100)}${relayState.length > 100 ? '...' : ''}`);
+    } else {
+      console.log('SAML SSO: No RelayState provided');
+    }
     
     // Handle consent responses
     if (consent) {
@@ -58,7 +81,7 @@ export async function handleSamlRequest(request, env, url, pathname, host) {
                 ID="_error_${Math.random().toString(36).substr(2, 9)}"
                 Version="2.0"
                 IssueInstant="${new Date().toISOString()}"
-                InResponseTo="${url.searchParams.get('SAMLRequest') ? 'original_request' : 'unknown'}">
+                InResponseTo="${samlRequest ? 'original_request' : 'unknown'}">
   <saml:Issuer>${config.entityId}</saml:Issuer>
   <samlp:Status>
     <samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Responder"/>
@@ -79,7 +102,6 @@ export async function handleSamlRequest(request, env, url, pathname, host) {
         
         if (consent === 'allow') {
           // We need to parse the SAML request to get the proper data
-          const samlRequest = url.searchParams.get('SAMLRequest');
           if (!samlRequest) {
             return errorResponse('Missing SAMLRequest parameter', 400);
           }
@@ -92,20 +114,45 @@ export async function handleSamlRequest(request, env, url, pathname, host) {
             return errorResponse('Failed to parse SAML request', 400);
           }
           
+          // Handle case where AssertionConsumerServiceURL is not provided (e.g., Microsoft)
+          let acsUrl = requestData.assertionConsumerServiceURL;
+          if (!acsUrl) {
+            if (requestData.issuer === 'urn:federation:MicrosoftOnline') {
+              // Extract Entra ID tenant from URL parameter
+              const entraTenant = url.searchParams.get('entra');
+              if (entraTenant) {
+                acsUrl = `https://login.microsoftonline.com/${entraTenant}/saml2`;
+                console.log(`SAML SSO: Using Entra ID tenant from URL parameter: ${entraTenant}`);
+              } else {
+                // Fallback to hardcoded tenant if no parameter provided
+                acsUrl = 'https://login.microsoftonline.com/1f1db437-f143-46be-9006-3bb7127491fd/saml2';
+                console.log('SAML SSO: No entra parameter found, using default tenant');
+              }
+            } else {
+              if (requestData.issuer) {
+                acsUrl = 'https://' + requestData.issuer.replace(/^urn:/, '').replace(/:/g, '.') + '/saml/acs';
+              } else {
+                acsUrl = 'https://saml.acs.fallback/saml/acs';
+                console.warn('SAML Consent: No issuer found, using generic ACS URL fallback');
+              }
+            }
+          }
+          
           // Create a state token containing the SAML request data
           const samlStateData = {
             samlRequestId: requestData.id,
-            assertionConsumerServiceURL: requestData.assertionConsumerServiceURL,
+            assertionConsumerServiceURL: acsUrl,
             issuer: requestData.issuer,
             relayState: relayState,
-            providerKey: providerKey
+            providerKey: providerKey,
+            entraTenant: url.searchParams.get('entra') // Store the tenant ID for later use
           };
           
           const stateToken = await generateSignedEmailCode(JSON.stringify(samlStateData), env.MASTER_SECRET);
           
           // Extract the OAuth provider from the SAML provider key (e.g., 'github-saml' -> 'github')
           const oauthProvider = providerKey.replace('-saml', '');
-          
+      
           // Get the OAuth provider configuration to use the correct client ID
           const providerConfigs = getProviderConfigs(env);
           const oauthConfig = providerConfigs[oauthProvider];
@@ -116,9 +163,13 @@ export async function handleSamlRequest(request, env, url, pathname, host) {
           
           // Redirect to actual OAuth provider (not our own domain)
           // For SAML flows, use the current domain with /saml/oauth-callback
-          const oauthUrl = getOAuthUrl(oauthProvider, oauthConfig, `${url.origin}/saml/oauth-callback`, stateToken);
-          
-          return Response.redirect(oauthUrl, 302);
+          try {
+            const oauthUrl = getOAuthUrl(oauthProvider, oauthConfig, `${url.origin}/saml/oauth-callback`, stateToken);
+            
+            return Response.redirect(oauthUrl, 302);
+          } catch (error) {
+            return errorResponse(`Failed to generate OAuth URL for ${oauthProvider}: ${error.message}`, 500);
+          }
         }
         
         return errorResponse('Invalid consent value', 400);
@@ -134,9 +185,39 @@ export async function handleSamlRequest(request, env, url, pathname, host) {
     }
     
     try {
+      
       const requestData = parseSamlRequest(samlRequest);
-      return await showSamlConsentScreen(url, requestData.issuer, requestData.assertionConsumerServiceURL, relayState, providerKey, env);
+      
+      // Check if destination matches the expected provider
+      const expectedDestination = `https://${providerKey}.sso.broker/saml/sso`;
+      if (requestData.destination !== expectedDestination) {
+        console.warn(`SAML SSO: Destination mismatch for ${providerKey}. Expected: ${expectedDestination}, Got: ${requestData.destination}`);
+      }
+      
+      // Handle case where AssertionConsumerServiceURL is not provided (e.g., Microsoft)
+      let acsUrl = requestData.assertionConsumerServiceURL;
+      if (!acsUrl) {
+        // For Microsoft and other providers that don't include ACS URL in request,
+        // we'll use a default or extract from issuer
+        if (requestData.issuer === 'urn:federation:MicrosoftOnline') {
+          // Microsoft typically uses this ACS URL pattern
+          acsUrl = 'https://login.microsoftonline.com/common/saml2';
+        } else {
+          // Fallback to a generic ACS URL
+          if (requestData.issuer) {
+            acsUrl = 'https://' + requestData.issuer.replace(/^urn:/, '').replace(/:/g, '.') + '/saml/acs';
+          } else {
+            // If no issuer, use a generic fallback
+            acsUrl = 'https://saml.acs.fallback/saml/acs';
+            console.warn('SAML SSO: No issuer found, using generic ACS URL fallback');
+          }
+        }
+        console.log(`SAML SSO: No ACS URL provided, using fallback: ${acsUrl}`);
+      }
+      
+      return await showSamlConsentScreen(url, requestData.issuer, acsUrl, relayState, providerKey, env, samlRequest);
     } catch (error) {
+      console.error(`SAML SSO: Error processing initial request for ${providerKey}:`, error);
       logError(error, { action: 'saml_sso', provider: providerKey }, env);
       return errorResponse('Failed to process SAML request', 500);
     }
@@ -149,9 +230,26 @@ export async function handleSamlRequest(request, env, url, pathname, host) {
     }
     
     try {
-      const code = url.searchParams.get('code');
-      const state = url.searchParams.get('state');
-      const error = url.searchParams.get('error');
+      let code, state, error;
+      
+      // Handle different response modes
+      if (request.method === 'POST') {
+        // Apple uses form_post response mode - data is in POST body
+        try {
+          const formData = await request.formData();
+          code = formData.get('code');
+          state = formData.get('state');
+          error = formData.get('error');
+        } catch (e) {
+          logError(new Error('Failed to parse form data from POST request'), { provider: providerKey, error: e.message }, env);
+          return errorResponse('Failed to parse callback data', 400);
+        }
+      } else {
+        // Other providers use query parameters
+        code = url.searchParams.get('code');
+        state = url.searchParams.get('state');
+        error = url.searchParams.get('error');
+      }
       
       if (error) {
         return errorResponse(`OAuth error: ${error}`, 400);
@@ -169,6 +267,13 @@ export async function handleSamlRequest(request, env, url, pathname, host) {
       }
       
       const samlStateData = JSON.parse(stateValidation.email);
+      
+      // Log RelayState from state data for debugging
+      if (samlStateData.relayState) {
+        console.log(`SAML OAuth Callback: RelayState from state: ${samlStateData.relayState.substring(0, 100)}${samlStateData.relayState.length > 100 ? '...' : ''}`);
+      } else {
+        console.log('SAML OAuth Callback: No RelayState in state data');
+      }
 
       // Get user email from OAuth provider
       const oauthProvider = providerKey.replace('-saml', '');
@@ -178,7 +283,7 @@ export async function handleSamlRequest(request, env, url, pathname, host) {
       if (!oauthConfig) {
         return errorResponse(`OAuth provider ${oauthProvider} not configured`, 500);
       }
-      
+
       const userEmail = await getUserEmailFromOAuthProvider(oauthProvider, code, oauthConfig, `${url.origin}/saml/oauth-callback`);
       
       if (!userEmail) {
@@ -192,14 +297,25 @@ export async function handleSamlRequest(request, env, url, pathname, host) {
         issuer: samlStateData.issuer
       };
       
-      const samlResponse = await generateSamlResponse(requestData, userEmail, config);
-      console.log('Generated SAML response length:', samlResponse.length);
-      console.log('Config private key present:', !!config.privateKey);
-      console.log('Config certificate present:', !!config.x509cert);
+      // Update ACS URL with dynamic tenant if we have one
+      if (samlStateData.entraTenant && samlStateData.issuer === 'urn:federation:MicrosoftOnline') {
+        requestData.assertionConsumerServiceURL = `https://login.microsoftonline.com/${samlStateData.entraTenant}/saml2`;
+        console.log(`SAML Response: Using dynamic tenant for ACS URL: ${samlStateData.entraTenant}`);
+      }
       
-      const signedResponse = await signSamlResponse(samlResponse, config.privateKey, config.x509cert);
-      console.log('Signed response length:', signedResponse.length);
-      console.log('Signature in signed response:', signedResponse.includes('<ds:Signature'));
+      // Create original request data for Microsoft compatibility
+      const originalRequest = {
+        issuer: samlStateData.issuer
+      };
+      
+      const samlResponse = await generateSamlResponse(requestData, userEmail, config, originalRequest);
+      
+      // Log final RelayState for debugging
+      if (samlStateData.relayState) {
+        console.log(`SAML Response: Including RelayState: ${samlStateData.relayState.substring(0, 100)}${samlStateData.relayState.length > 100 ? '...' : ''}`);
+      } else {
+        console.log('SAML Response: No RelayState to include');
+      }
       
       // Return SAML response as HTML form for POST binding
       const htmlResponse = `
@@ -210,8 +326,8 @@ export async function handleSamlRequest(request, env, url, pathname, host) {
 </head>
 <body onload="document.forms[0].submit()">
     <form method="post" action="${requestData.assertionConsumerServiceURL}">
-        <input type="hidden" name="SAMLResponse" value="${btoa(signedResponse)}" />
-        ${samlStateData.relayState ? `<input type="hidden" name="RelayState" value="${samlStateData.relayState}" />` : ''}
+        <input type="hidden" name="SAMLResponse" value="${samlResponse}" />
+        ${samlStateData.relayState ? `<input type="hidden" name="RelayState" value="${samlStateData.relayState.replace(/"/g, '&quot;')}" />` : ''}
     </form>
 </body>
 </html>`;

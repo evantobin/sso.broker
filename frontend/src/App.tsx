@@ -2,6 +2,7 @@ import { Routes, Route, Link, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
+import Tutorials from './pages/Tutorials';
 import './App.css';
 
 function App() {
@@ -48,6 +49,7 @@ function App() {
       {/* Main Content */}
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/tutorials" element={<Tutorials />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
       </Routes>
@@ -69,6 +71,12 @@ function App() {
           {/* Terms and Privacy Links */}
           <div className="max-w-2xl mx-auto">
             <div className="flex justify-center gap-8">
+              <Link 
+                to="/tutorials" 
+                className="text-sm font-medium"
+              >
+                Tutorials
+              </Link>
               <Link 
                 to="/terms" 
                 className="text-sm font-medium"
