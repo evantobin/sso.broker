@@ -3,6 +3,7 @@ import Home from './pages/Home';
 import TermsOfService from './pages/TermsOfService';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import Tutorials from './pages/Tutorials';
+import TutorialDetail from './pages/TutorialDetail';
 import './App.css';
 
 function App() {
@@ -50,13 +51,90 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/tutorials" element={<Tutorials />} />
+        <Route path="/tutorials/:id" element={<TutorialDetail />} />
         <Route path="/terms" element={<TermsOfService />} />
         <Route path="/privacy" element={<PrivacyPolicy />} />
       </Routes>
 
-      {/* Footer - Only show on home page */}
+      {/* Footer - Show on home page, tutorials, and tutorial detail pages */}
       <Routes>
         <Route path="/" element={
+      <footer className="py-12 border-t border-primary">
+            <div className="container mx-auto px-6">
+              <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <span className="text-2xl font-black tracking-tight brand-logo brand-logo-medium">
+              sso.broker
+            </span>
+          </div>
+          <p className="text-sm text-tertiary">© 2025 sso.broker. Built with ❤️ for developers.</p>
+          </div>
+          
+          {/* Terms and Privacy Links */}
+          <div className="max-w-2xl mx-auto">
+            <div className="flex justify-center gap-8">
+              <Link 
+                to="/tutorials" 
+                className="text-sm font-medium"
+              >
+                Tutorials
+              </Link>
+              <Link 
+                to="/terms" 
+                className="text-sm font-medium"
+              >
+                Terms of Service
+              </Link>
+              <Link 
+                to="/privacy" 
+                className="text-sm font-medium"
+              >
+                Privacy Policy
+              </Link>
+            </div>
+          </div>
+        </div>
+      </footer>
+        } />
+        <Route path="/tutorials" element={
+      <footer className="py-12 border-t border-primary">
+            <div className="container mx-auto px-6">
+              <div className="text-center mb-8">
+          <div className="flex items-center justify-center mb-4">
+            <span className="text-2xl font-black tracking-tight brand-logo brand-logo-medium">
+              sso.broker
+            </span>
+          </div>
+          <p className="text-sm text-tertiary">© 2025 sso.broker. Built with ❤️ for developers.</p>
+          </div>
+          
+          {/* Terms and Privacy Links */}
+          <div className="max-w-2xl mx-auto">
+            <div className="flex justify-center gap-8">
+              <Link 
+                to="/tutorials" 
+                className="text-sm font-medium"
+              >
+                Tutorials
+              </Link>
+              <Link 
+                to="/terms" 
+                className="text-sm font-medium"
+              >
+                Terms of Service
+              </Link>
+              <Link 
+                to="/privacy" 
+                className="text-sm font-medium"
+              >
+                Privacy Policy
+              </Link>
+            </div>
+          </div>
+        </div>
+      </footer>
+        } />
+        <Route path="/tutorials/:id" element={
       <footer className="py-12 border-t border-primary">
             <div className="container mx-auto px-6">
               <div className="text-center mb-8">

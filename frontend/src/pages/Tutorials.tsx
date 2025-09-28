@@ -1,191 +1,122 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import { tutorials } from '../data/content';
 
 const Tutorials: React.FC = () => {
+  const getDifficultyColor = (difficulty: string) => {
+    switch (difficulty) {
+      case 'Beginner': return 'bg-green-100 text-green-800 border-green-200';
+      case 'Intermediate': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
+      case 'Advanced': return 'bg-red-100 text-red-800 border-red-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-4xl font-bold text-gray-900 mb-8">Tutorials</h1>
-      
-      <div className="space-y-8">
-        {/* Microsoft Entra ID with Apple ID Tutorial */}
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            Configuring Microsoft Entra ID to Use Apple ID for Login
-          </h2>
-          
-          <div className="prose max-w-none">
-            <p className="text-gray-700 mb-6">
-              This tutorial will guide you through setting up Microsoft Entra ID (formerly Azure Active Directory) 
-              to use Apple ID as an authentication method via SAML. This allows users to sign in to Microsoft 
-              services using their Apple ID credentials.
+    <div className="min-h-screen bg-primary">
+      <div className="container mx-auto px-4 py-12 max-w-6xl">
+        {/* Header */}
+        <div className="text-center mb-16">
+          <h1 className="text-5xl font-bold text-primary mb-4">Tutorials</h1>
+          <p className="text-xl text-secondary max-w-2xl mx-auto">
+            Step-by-step guides to help you integrate sso.broker with your identity providers
+          </p>
+        </div>
+        
+        {/* Tutorials Grid */}
+        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          {tutorials.map((tutorial) => (
+            <Link
+              key={tutorial.id}
+              to={`/tutorials/${tutorial.id}`}
+              className="group block"
+            >
+              <article className="bg-secondary rounded-2xl shadow-xl overflow-hidden border border-primary hover:shadow-2xl transition-all duration-300 group-hover:scale-105">
+                {/* Tutorial Header */}
+                <div className="bg-primary px-6 py-8">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="bg-accent rounded-lg p-2">
+                      <svg className="w-5 h-5 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                    </div>
+                    <span className="text-secondary text-sm font-medium">{tutorial.category}</span>
+                  </div>
+                  <h2 className="text-xl font-bold text-secondary mb-2 line-clamp-2">
+                    {tutorial.title}
+                  </h2>
+                  <p className="text-secondary text-sm leading-relaxed line-clamp-2">
+                    {tutorial.description}
+                  </p>
+                </div>
+                
+                {/* Tutorial Content */}
+                <div className="px-6 py-6">
+                  {/* Meta Information */}
+                  <div className="flex items-center gap-4 mb-4">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-secondary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-sm text-secondary">{tutorial.estimatedTime}</span>
+                    </div>
+                    <div className={`px-2 py-1 rounded-full text-xs font-medium border ${getDifficultyColor(tutorial.difficulty)}`}>
+                      {tutorial.difficulty}
+                    </div>
+                  </div>
+                  
+                  {/* Tags */}
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {tutorial.tags.slice(0, 3).map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-2 py-1 bg-accent text-primary text-xs rounded-md border border-primary"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                    {tutorial.tags.length > 3 && (
+                      <span className="px-2 py-1 bg-accent text-primary text-xs rounded-md border border-primary">
+                        +{tutorial.tags.length - 3} more
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Read More */}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-secondary">Last updated: {new Date(tutorial.lastUpdated).toLocaleDateString()}</span>
+                    <div className="flex items-center gap-2 text-primary group-hover:gap-3 transition-all">
+                      <span className="text-sm font-medium">Read Tutorial</span>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </Link>
+          ))}
+        </div>
+        
+        {/* Call to Action */}
+        <div className="text-center mt-16">
+          <div className="bg-accent border border-primary rounded-2xl p-8 max-w-2xl mx-auto">
+            <h3 className="text-2xl font-bold text-primary mb-4">Need Help Getting Started?</h3>
+            <p className="text-secondary mb-6">
+              Our tutorials cover everything from basic SAML setup to advanced enterprise configurations. 
+              Can't find what you're looking for? Let us know!
             </p>
-
-            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
-              <p className="text-blue-800">
-                <strong>Prerequisites:</strong> You'll need administrative access to Microsoft Entra ID and 
-                a configured SAML Identity Provider (like sso.broker) that supports Apple ID authentication.
-              </p>
-            </div>
-
-            <h3 className="text-xl font-semibold text-gray-900 mt-8 mb-4">Step 1: Configure Domain Federation</h3>
-            
-            <p className="text-gray-700 mb-4">
-              First, you need to configure domain federation in Microsoft Entra ID using PowerShell:
-            </p>
-
-            <div className="bg-gray-100 rounded-lg p-4 mb-4">
-              <pre className="text-sm overflow-x-auto">
-{`# Connect to Microsoft Graph PowerShell
-Connect-MgGraph -Scopes "Domain.ReadWrite.All"
-
-# Set your domain ID (replace with your actual domain)
-$domainId = "your-domain.onmicrosoft.com"
-
-# Configure domain federation parameters
-$domainAuthParams = @{
-    DomainId = $domainId
-    ActiveSignInUri = "https://apple-saml.sso.broker/saml/sso?entra=YOUR_TENANT_ID"
-    PassiveSignInUri = "https://apple-saml.sso.broker/saml/sso?entra=YOUR_TENANT_ID"
-    IssuerUri = "urn:apple-saml.sso.broker"
-    DisplayName = "Apple SAML Broker"
-    FederatedIdpMfaBehavior = "acceptIfMfaDoneByFederatedIdp"
-    PreferredAuthenticationProtocol = "saml"
-}
-
-# Create the federation configuration
-New-MgDomainFederationConfiguration @domainAuthParams`}
-              </pre>
-            </div>
-
-            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-              <p className="text-yellow-800">
-                <strong>Important:</strong> Replace <code>YOUR_TENANT_ID</code> with your actual Microsoft Entra ID tenant ID. 
-                You can find this in the Azure Portal under Azure Active Directory → Overview.
-              </p>
-            </div>
-
-            <h3 className="text-xl font-semibold text-gray-900 mt-8 mb-4">Step 2: Verify Domain Federation Configuration</h3>
-            
-            <p className="text-gray-700 mb-4">
-              After running the PowerShell command, you can verify the configuration was created successfully:
-            </p>
-
-            <div className="bg-gray-100 rounded-lg p-4 mb-4">
-              <pre className="text-sm overflow-x-auto">
-{`# Check the federation configuration
-Get-MgDomainFederationConfiguration -DomainId $domainId
-
-# You should see output similar to:
-# DisplayName       Id                                   IssuerUri
-# -----------       --                                   ---------
-# Apple SAML Broker 150f5e87-d539-4790-9e73-de1b6a130f45 urn:apple-saml.sso.broker`}
-              </pre>
-            </div>
-
-            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
-              <p className="text-blue-800">
-                <strong>Note:</strong> The PowerShell command automatically creates the SAML application configuration 
-                in Microsoft Entra ID. No additional manual configuration is needed.
-              </p>
-            </div>
-
-            <h3 className="text-xl font-semibold text-gray-900 mt-8 mb-4">Step 3: Configure User Attributes</h3>
-            
-            <p className="text-gray-700 mb-4">
-              Set up the user attributes that will be sent from your SAML Identity Provider:
-            </p>
-
-            <div className="bg-gray-100 rounded-lg p-4 mb-4">
-              <h4 className="font-semibold mb-2">Required Claims:</h4>
-              <ul className="list-disc list-inside space-y-1 text-sm">
-                <li><strong>Name ID:</strong> <code>http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier</code></li>
-                <li><strong>Email Address:</strong> <code>http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress</code></li>
-                <li><strong>Display Name:</strong> <code>http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name</code></li>
-                <li><strong>UPN:</strong> <code>http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn</code></li>
-              </ul>
-            </div>
-
-            <h3 className="text-xl font-semibold text-gray-900 mt-8 mb-4">Step 4: Create Users in Microsoft Entra ID</h3>
-            
-            <p className="text-gray-700 mb-4">
-              Before users can authenticate with Apple ID, they need to be created in Microsoft Entra ID. 
-              Use PowerShell to create users:
-            </p>
-
-            <div className="bg-gray-100 rounded-lg p-4 mb-4">
-              <pre className="text-sm overflow-x-auto">
-{`# Create a new user in Microsoft Entra ID
-New-MgUser -DisplayName "John Doe" -UserPrincipalName "john@company.com" -accountEnabled -mailNickname "johndoe" -PasswordProfile @{Password="SecurePassword123!"} -OnPremisesImmutableId "john@company.com"`}
-              </pre>
-            </div>
-
-            <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-6">
-              <p className="text-yellow-800">
-                <strong>Important:</strong> The <code>OnPremisesImmutableId</code> should match the email address 
-                that will be used for Apple ID authentication. This creates the link between the Entra ID user 
-                and the SAML assertion.
-              </p>
-            </div>
-
-            <p className="text-gray-700 mb-4">
-              For multiple users, you can create them in bulk:
-            </p>
-
-            <div className="bg-gray-100 rounded-lg p-4 mb-6">
-              <pre className="text-sm overflow-x-auto">
-{`# Example: Create multiple users
-$users = @(
-    @{DisplayName="John Doe"; UPN="john@company.com"; MailNickname="johndoe"},
-    @{DisplayName="Jane Smith"; UPN="jane@company.com"; MailNickname="janesmith"}
-)
-
-foreach ($user in $users) {
-    New-MgUser -DisplayName $user.DisplayName -UserPrincipalName $user.UPN -accountEnabled -mailNickname $user.MailNickname -PasswordProfile @{Password="SecurePassword123!"} -OnPremisesImmutableId $user.UPN
-}`}
-              </pre>
-            </div>
-
-            <h3 className="text-xl font-semibold text-gray-900 mt-8 mb-4">Step 5: Test the Configuration</h3>
-            
-            <p className="text-gray-700 mb-4">
-              Test your configuration by accessing the application:
-            </p>
-
-            <ol className="list-decimal list-inside space-y-3 text-gray-700 mb-6">
-              <li>Go to <strong>My Apps</strong> (myapps.microsoft.com)</li>
-              <li>Find your configured application</li>
-              <li>Click on it to initiate the SAML authentication flow</li>
-              <li>You should be redirected to the Apple ID login page</li>
-              <li>After successful authentication, you should be redirected back to Microsoft</li>
-            </ol>
-
-            <div className="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
-              <p className="text-green-800">
-                <strong>Success!</strong> If you can successfully sign in using your Apple ID, 
-                the configuration is working correctly.
-              </p>
-            </div>
-
-            <h3 className="text-xl font-semibold text-gray-900 mt-8 mb-4">Troubleshooting</h3>
-            
-            <div className="space-y-4">
-              <div className="bg-red-50 border-l-4 border-red-400 p-4">
-                <h4 className="font-semibold text-red-800 mb-2">Common Issues:</h4>
-                <ul className="list-disc list-inside space-y-1 text-red-700 text-sm">
-                  <li><strong>AADSTS51004:</strong> User account doesn't exist in directory - Create the user using <code>New-MgUser</code> PowerShell command</li>
-                  <li><strong>AADSTS500081:</strong> SAML assertion validation failed - Check XML signature</li>
-                  <li><strong>AADSTS50186:</strong> Unpermitted realm - Verify issuer configuration</li>
-                  <li><strong>Authentication fails:</strong> Ensure <code>OnPremisesImmutableId</code> matches the email in SAML assertion</li>
-                </ul>
-              </div>
-            </div>
-
-            <h3 className="text-xl font-semibold text-gray-900 mt-8 mb-4">Additional Resources</h3>
-            
-            <ul className="list-disc list-inside space-y-2 text-gray-700">
-              <li><a href="https://docs.microsoft.com/en-us/azure/active-directory/develop/single-sign-on-saml-protocol" className="text-blue-600 hover:text-blue-800">Microsoft SAML Protocol Documentation</a></li>
-              <li><a href="https://docs.microsoft.com/en-us/azure/active-directory/develop/reference-saml-tokens" className="text-blue-600 hover:text-blue-800">SAML Token Reference</a></li>
-              <li><a href="https://docs.microsoft.com/en-us/azure/active-directory/develop/howto-v1-federated-saml-idp" className="text-blue-600 hover:text-blue-800">Federated SAML Identity Provider Guide</a></li>
-            </ul>
+            <a
+              href="https://github.com/evantobin/sso.broker"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-primary text-secondary rounded-lg font-medium hover:bg-accent transition-colors"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
+              Request a Tutorial
+            </a>
           </div>
         </div>
       </div>
